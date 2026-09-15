@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.sqldelight)
+    alias(libs.plugins.kover)
 }
 
 kotlin {
@@ -45,7 +47,21 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
+            
+            // SQLDelight Driver para Android
+            implementation(libs.sqldelight.android)
         }
+        
+        iosMain.dependencies {
+            // SQLDelight Driver para iOS
+            implementation(libs.sqldelight.native)
+        }
+        
+        jvmMain.dependencies {
+            // SQLDelight Driver para Desktop/JVM
+            implementation(libs.sqldelight.sqlite)
+        }
+
         commonMain.dependencies {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
@@ -55,13 +71,55 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            
+            // Injeção de Dependência
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            
+            // Threads e Assincronismo
+            implementation(libs.kotlinx.coroutines.core)
+            
+            // SQLDelight (Extensão para suportar Flow/Coroutines)
+            implementation(libs.sqldelight.coroutines)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.mockk.common)
         }
     }
 }
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
+}
+
+sqldelight {
+    databases {
+        create("KlabDatabase") {
+            packageName.set("com.klab.app.infra.local") 
+        }
+    }
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                packages(
+                    "com.klab.app.presentation.*",
+                    "com.klab.app.di.*"
+                )
+            }
+        }
+        verify {
+            rule("Cobertura Minima da Regra de Negocio") {
+                // TODO: Descomentar essa trava quando o projeto tiver mais testes
+                /*
+                bound {
+                    minValue = 80 
+                }
+                */
+            }
+        }
+    }
 }
