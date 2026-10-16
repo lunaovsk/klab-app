@@ -5,13 +5,10 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-<<<<<<< HEAD
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
-=======
     alias(libs.plugins.sqldelight)
     alias(libs.plugins.kover)
->>>>>>> origin/main
 }
 
 kotlin {
@@ -76,11 +73,9 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
-<<<<<<< HEAD
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.kotlinx.datetime)
-=======
             
             // Injeção de Dependência
             implementation(libs.koin.core)
@@ -101,7 +96,6 @@ kotlin {
             dependencies {
                 implementation(libs.mockk.common)
             }
->>>>>>> origin/main
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -112,7 +106,6 @@ kotlin {
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
-<<<<<<< HEAD
     add("kspCommonMainMetadata", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspJvm", libs.androidx.room.compiler)
@@ -122,8 +115,6 @@ dependencies {
 
 room {
     schemaDirectory("$projectDir/schemas")
-}
-=======
 }
 
 sqldelight {
@@ -156,4 +147,3 @@ kover {
         }
     }
 }
->>>>>>> origin/main
