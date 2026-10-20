@@ -19,7 +19,7 @@ import com.klab.app.infra.local.MealPlanEntity
         MealOptionEntity::class, MealItemEntity::class, FoodEntity::class],
     version = 1)
 @ConstructedBy(AppDatabaseConstructor::class)
-abstract class Database : RoomDatabase() {
+abstract class KlabDatabase : RoomDatabase() {
 
     abstract fun mealPlanDao(): MealPlanDao
     abstract fun mealDao(): MealDao
