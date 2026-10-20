@@ -1,7 +1,13 @@
-package com.klab.app.infra.dao
+package com.klab.app.infra.database
 
 import androidx.room.ConstructedBy
 import androidx.room.Database
+import androidx.room.RoomDatabase
+import com.klab.app.infra.dao.FoodDao
+import com.klab.app.infra.dao.MealDao
+import com.klab.app.infra.dao.MealItemDao
+import com.klab.app.infra.dao.MealOptionDao
+import com.klab.app.infra.dao.MealPlanDao
 import com.klab.app.infra.local.FoodEntity
 import com.klab.app.infra.local.MealEntity
 import com.klab.app.infra.local.MealItemEntity
@@ -13,6 +19,13 @@ import com.klab.app.infra.local.MealPlanEntity
         MealOptionEntity::class, MealItemEntity::class, FoodEntity::class],
     version = 1)
 @ConstructedBy(AppDatabaseConstructor::class)
-abstract class Database {
+abstract class Database : RoomDatabase() {
+
+    abstract fun mealPlanDao(): MealPlanDao
+    abstract fun mealDao(): MealDao
+    abstract fun mealOptionDao(): MealOptionDao
+    abstract fun mealItemDao(): MealItemDao
+    abstract fun foodDao(): FoodDao
 
 }
+

@@ -1,4 +1,8 @@
 package com.klab.app.infra.database
 
-class AppDatabaseConstructor {
+import androidx.room.RoomDatabaseConstructor
+
+@Suppress("KotlinNoActualForExpect")
+expect object  AppDatabaseConstructor : RoomDatabaseConstructor<Database> {
+    override fun initialize(): Database
 }
