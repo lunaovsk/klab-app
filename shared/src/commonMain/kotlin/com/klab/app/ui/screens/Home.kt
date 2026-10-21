@@ -24,7 +24,7 @@ import com.klab.app.ui.theme.*
 @Preview
 fun HomeScreen(
     onStartPlanning: () -> Unit = {
-        println("Planejamento iniciado")
+        DailyGoalsScreen()
     }
 ) {
     MaterialTheme {
