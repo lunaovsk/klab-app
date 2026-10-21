@@ -10,7 +10,7 @@ class PlanWithMeal (
     @Embedded
     val plan: MealPlanEntity,
     @Relation(parentColumn = "id", entityColumn = "fk_plan_id")
-    val entity: List<MealEntity>
+    val entity: Set<MealEntity>
 
 ) {
 }

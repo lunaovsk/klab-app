@@ -19,10 +19,10 @@ class MealEntity (
 
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     @ColumnInfo("fk_plan_id") val fkPlanId: Long,
+    val name: String,
     val type: String,
     val order: Int,
     @Embedded(prefix = "goal_meal_") val macrosEntity: MacrosEntity
-
 
 ) {
 }
