@@ -20,11 +20,19 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
+    - name: Cache do Kotlin/Native (iOS)
+      uses: actions/cache@v4
+      with:
+        path: ~/.konan
+        key: ${{ runner.os }}-konan-${{ hashFiles('gradle/libs.versions.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-konan-
+
     - name: Cache do Gradle
       uses: gradle/actions/setup-gradle@v4
 
     - name: Dar permissão de execução
       run: chmod +x gradlew
 
-    - name: Compilar e Testar
-      run: ./gradlew build
+    - name: Compilar (Android, iOS, Desktop) e Testar
+      run: ./gradlew :shared:compileKotlinJvm :shared:compileAndroidMain :shared:compileKotlinIosSimulatorArm64 :shared:jvmTest --parallel --build-cache
