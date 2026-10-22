@@ -35,4 +35,4 @@ jobs:
       run: chmod +x gradlew
 
     - name: Compilar (Android, iOS, Desktop) e Testar
-      run: ./gradlew :shared:compileKotlinJvm :shared:compileAndroidMain :shared:compileKotlinIosSimulatorArm64 :shared:jvmTest --parallel --build-cache
+      run: ./gradlew :shared:compileCommonMainKotlinMetadata :shared:compileKotlinJvm :shared:compileAndroidMain :shared:compileKotlinIosSimulatorArm64 :shared:jvmTest --parallel --build-cache

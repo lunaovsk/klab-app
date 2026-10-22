@@ -11,11 +11,8 @@ class MealPlanEntity (
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val title: String,
-    @ColumnInfo(name = "created_at")val createdAt: String,
+    @ColumnInfo(name = "created_at") val createdAt: String,
+    @ColumnInfo(name = "is_active") val isActive: Boolean = true,
     @Embedded(prefix = "goal_") val macrosEntity: MacrosEntity
 
-) {
-
-
-
-}
+)

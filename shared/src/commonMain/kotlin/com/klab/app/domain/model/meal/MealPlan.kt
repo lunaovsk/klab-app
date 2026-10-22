@@ -3,20 +3,22 @@ package com.klab.app.domain.model.meal
 import com.klab.app.domain.model.food.Macros
 import kotlinx.datetime.LocalDate
 
-data class MealPlan(
+class MealPlan(
     val id: Long,
     val title: String,
     val createdAt: LocalDate,
     val goal: Macros,
-    private val meals: MutableSet<Meal>
-
+    val meals: MutableSet<Meal>,
+    isActive: Boolean = true
 ) {
-    var isActive: Boolean = true
-    private set
+    var isActive: Boolean = isActive
+        private set
+
     init {
         require(title.isNotBlank()) { throw(IllegalArgumentException("Title must be non-blank")) }
         require(goal.calorie > 0) { throw(IllegalArgumentException("Goal must be positive")) }
     }
+
     fun addMeal (type: String, dailyGoalPercentage: Float): MealPlan {
         TODO("Not yet implemented")
     }
@@ -26,13 +28,14 @@ data class MealPlan(
     }
 
     fun desactivate () {
-        this.isActive = false;
+        this.isActive = false
     }
+
     fun calculateDailyTotal(selectedOptions: Map<Long, Long>): Macros {
         TODO("Not yet implemented")
     }
+
     fun isGoalReached(consumed: Macros): Boolean {
         TODO("Not yet implemented")
     }
-
 }
