@@ -3,30 +3,21 @@ package com.klab.app.ui.screens
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.klab.app.ui.components.MainButton
+import com.klab.app.ui.components.*
 import com.klab.app.ui.theme.*
 
 @Composable
 @Preview
-fun HomeScreen(
-    onStartPlanning: () -> Unit = {
-        DailyGoalsScreen()
-    }
-) {
+fun HomeScreen( onStartPlanning: () -> Unit ) {
     MaterialTheme {
         Column(
             modifier = Modifier
@@ -44,11 +35,9 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            Text(
+            SectionTitle(
                 text = "Klab",
                 fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
-                color = MainTexts
             )
 
             Spacer(modifier = Modifier.height(48.dp))

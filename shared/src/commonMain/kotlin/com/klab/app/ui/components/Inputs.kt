@@ -9,18 +9,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.klab.app.ui.theme.*
 
 @Composable
-@Preview
 fun NumericInput(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
     unit: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    placeholder: String = ""
 ) {
     OutlinedTextField(
         value = value,
@@ -41,12 +40,12 @@ fun NumericInput(
             unfocusedBorderColor = MainTexts.copy(alpha = 0.35f),
             focusedTextColor = MainTexts,
             unfocusedTextColor = MainTexts
-        )
+        ),
+        placeholder= { Text(placeholder) }
     )
 }
 
 @Composable
-@Preview
 fun PercentageInput(
     value: String,
     onValueChange: (String) -> Unit,

@@ -34,7 +34,7 @@ fun MacronutrientCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = GreenDetails
+            containerColor = nutrientColor.copy(alpha = 0.15f)
         )
     ) {
         Column(
