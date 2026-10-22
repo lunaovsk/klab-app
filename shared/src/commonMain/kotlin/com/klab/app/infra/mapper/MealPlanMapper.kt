@@ -11,6 +11,7 @@ fun MealPlan.toEntity(): MealPlanEntity {
         id = this.id,
         title = this.title,
         createdAt = this.createdAt.toString(),
+        isActive = this.isActive,
         macrosEntity = this.goal.toEntity()
     )
 }
@@ -21,7 +22,8 @@ fun MealPlanEntity.toDomain(): MealPlan {
         title = this.title,
         createdAt = LocalDate.parse(this.createdAt),
         goal = this.macrosEntity.toDomain(),
-        meals = mutableSetOf()
+        meals = mutableSetOf(),
+        isActive = this.isActive
     )
 }
 
@@ -31,6 +33,7 @@ fun PlanWithMeal.toDomain(): MealPlan {
         title = this.plan.title,
         createdAt = LocalDate.parse(this.plan.createdAt),
         goal = this.plan.macrosEntity.toDomain(),
-        meals = this.entity.map(MealEntity::toDomain).toMutableSet()
+        meals = this.entity.map(MealEntity::toDomain).toMutableSet(),
+        isActive = this.plan.isActive
     )
 }
