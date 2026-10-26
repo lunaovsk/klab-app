@@ -2,6 +2,7 @@ package com.klab.app.database
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.klab.app.di.appDatabaseBuilder
 import com.klab.app.infra.database.KlabDatabase
 import java.io.File
 
@@ -13,5 +14,8 @@ class BuildDesktop {
             name = dbFile.absolutePath
         )
     }
-}
 
+    fun initDatabase() {
+        appDatabaseBuilder = getDatabaseBuilder()
+    }
+}
