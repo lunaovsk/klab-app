@@ -4,11 +4,11 @@ import com.klab.app.domain.model.food.Macros
 import kotlinx.datetime.LocalDate
 
 class MealPlan(
-    val id: Long,
+    val id: Long = 0L,
     val title: String,
     val createdAt: LocalDate,
     val goal: Macros,
-    val meals: MutableSet<Meal>,
+    val meals: MutableSet<Meal> = mutableSetOf(),
     isActive: Boolean = true
 ) {
     var isActive: Boolean = isActive
