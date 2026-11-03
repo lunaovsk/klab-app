@@ -1,7 +1,10 @@
 package com.klab.app.ui.viewModel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.klab.app.domain.dto.meal.MealPlanRequest
 import com.klab.app.domain.model.food.Macros
 import com.klab.app.service.usecase.MealPlanService
@@ -35,5 +38,15 @@ class MealPlanViewModel( private val mealPlanService: MealPlanService): ViewMode
                 )
             }
         }
+    }
+    companion object {
+        fun factory(mealPlanService: MealPlanService): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    MealPlanViewModel(
+                        mealPlanService = mealPlanService
+                    )
+                }
+            }
     }
 }

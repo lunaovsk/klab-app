@@ -22,18 +22,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.klab.app.domain.dto.meal.MealPlanRequest
-
+import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.ui.components.*
 import com.klab.app.ui.theme.*
 import com.klab.app.ui.viewModel.MealPlanViewModel
+import org.koin.compose.koinInject
 
 @Composable
 @Preview
 fun DailyGoalsScreen(
-    viewModel : MealPlanViewModel,
     onContinue: (MealPlanRequest) -> Unit = {}
 ) {
+    val mealPlanService: MealPlanService = koinInject()
+    val viewModel: MealPlanViewModel = viewModel(
+        factory = MealPlanViewModel.factory(mealPlanService)
+    )
     var dailyCalories by remember { mutableStateOf("2000") }
     var carbohydrates by remember { mutableStateOf("50") }
     var proteins by remember { mutableStateOf("20") }
