@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,19 +22,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import com.klab.app.domain.dto.meal.MealPlanRequest
 
 import com.klab.app.ui.components.*
 import com.klab.app.ui.theme.*
+import com.klab.app.ui.viewModel.MealPlanViewModel
 
 @Composable
 @Preview
-fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
+fun DailyGoalsScreen(
+    viewModel : MealPlanViewModel,
+    onContinue: (MealPlanRequest) -> Unit = {}
+) {
     var dailyCalories by remember { mutableStateOf("2000") }
     var carbohydrates by remember { mutableStateOf("50") }
     var proteins by remember { mutableStateOf("20") }
     var lipids by remember { mutableStateOf("30") }
+    var planTitle by remember { mutableStateOf("") }
 
-    val calories = dailyCalories.toDoubleOrNull() ?: 0.0
+    val uiState by viewModel.uiState.collectAsState()
+
+    val calories = dailyCalories.toFloatOrNull() ?: 0f
 
     val carbohydratesPercentage = carbohydrates.toIntOrNull() ?: 0
     val proteinsPercentage = proteins.toIntOrNull() ?: 0
@@ -45,15 +54,26 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
     val isDistributionValid = totalPercentage == 100
 
     val isFormValid =
-        calories > 0 &&
-                dailyCalories.isNotBlank() &&
-                carbohydrates.toIntOrNull() != null &&
-                proteins.toIntOrNull() != null &&
-                lipids.toIntOrNull() != null &&
-                carbohydratesPercentage in 0..100 &&
-                proteinsPercentage in 0..100 &&
-                lipidsPercentage in 0..100 &&
-                isDistributionValid
+        calories > 0f &&
+        planTitle.isNotBlank() &&
+        carbohydrates.toIntOrNull() != null &&
+        proteins.toIntOrNull() != null &&
+        lipids.toIntOrNull() != null &&
+        carbohydratesPercentage in 0..100 &&
+        proteinsPercentage in 0..100 &&
+        lipidsPercentage in 0..100 &&
+        isDistributionValid
+
+    val request = MealPlanRequest(
+        title = planTitle.trim(),
+        calories = calories,
+        carbosPerc = carbohydratesPercentage,
+        proteinPerc = proteinsPercentage,
+        fatPerc = lipidsPercentage
+    )
+
+    val macros = remember(request) { viewModel.previewMacros(request) }
+
     MaterialTheme {
         Column(
             modifier = Modifier
@@ -89,7 +109,7 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
                 name = "Carboidratos",
                 percentage = carbohydrates,
                 onPercentageChange = { carbohydrates = it },
-                grams = "--",
+                grams = macros.carb?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
                 nutrientColor = Carbohydrates
             )
 
@@ -97,7 +117,7 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
                 name = "Proteínas",
                 percentage = proteins,
                 onPercentageChange = { proteins = it },
-                grams = "--",
+                grams =macros.protein?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
                 nutrientColor = Proteins
             )
 
@@ -105,7 +125,7 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
                 name = "Lipídios",
                 percentage = lipids,
                 onPercentageChange = { lipids = it },
-                grams = "--",
+                grams = macros.fat?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
                 nutrientColor = Lipids
             )
 
@@ -124,7 +144,17 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
 
             MainButton(
                 text = "Continuar",
-                onClick = onContinue,
+                onClick = {
+                    val request = MealPlanRequest(
+                        title = planTitle.trim(),
+                        calories = calories,
+                        carbosPerc = carbohydratesPercentage,
+                        proteinPerc = proteinsPercentage,
+                        fatPerc = lipidsPercentage
+                    )
+
+                    onContinue(request)
+                },
                 enabled = isFormValid,
                 modifier = Modifier.fillMaxWidth()
             )
