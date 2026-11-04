@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 import com.klab.app.ui.components.*
 import com.klab.app.ui.theme.*
+import kotlin.math.round
 
 @Composable
 @Preview
@@ -43,6 +44,15 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
         carbohydratesPercentage + proteinsPercentage + lipidsPercentage
 
     val isDistributionValid = totalPercentage == 100
+
+    val carbohydratesGrams =
+        calories * carbohydratesPercentage / 100.0 / 4.0
+
+    val proteinsGrams =
+        calories * proteinsPercentage / 100.0 / 4.0
+
+    val lipidsGrams =
+        calories * lipidsPercentage / 100.0 / 9.0
 
     val isFormValid =
         calories > 0 &&
@@ -89,7 +99,7 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
                 name = "Carboidratos",
                 percentage = carbohydrates,
                 onPercentageChange = { carbohydrates = it },
-                grams = "--",
+                grams = (round(carbohydratesGrams * 10) / 10).toString(),
                 nutrientColor = Carbohydrates
             )
 
@@ -97,7 +107,7 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
                 name = "Proteínas",
                 percentage = proteins,
                 onPercentageChange = { proteins = it },
-                grams = "--",
+                grams = (round(proteinsGrams * 10) / 10).toString(),
                 nutrientColor = Proteins
             )
 
@@ -105,8 +115,13 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
                 name = "Lipídios",
                 percentage = lipids,
                 onPercentageChange = { lipids = it },
-                grams = "--",
+                grams = (round(lipidsGrams * 10) / 10).toString(),
                 nutrientColor = Lipids
+            )
+
+            SubText(
+                text = "Total dos percentuais: $totalPercentage%",
+                color = if (isDistributionValid) MainTexts else Errors
             )
 
             if (!isDistributionValid) {
