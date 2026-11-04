@@ -13,6 +13,7 @@ class MealPlanService (
 ) {
 
     suspend fun create(request: MealPlanRequest): MealPlan {
+        require(request.carbosPerc + request.proteinPerc + request.fatPerc == 100)
         val goal = calculateMacros(request)
         val mealPlan = MealPlan(
             title = request.title,
@@ -25,7 +26,6 @@ class MealPlanService (
     }
     private fun calculateMacros(request: MealPlanRequest): Macros {
         require(request.calories>0)
-        require(request.carbosPerc+request.proteinPerc+request.fatPerc==100)
 
         //cada grama de carb e protein possuem 4kcal e lipidios possuem 9kcal
         return Macros(

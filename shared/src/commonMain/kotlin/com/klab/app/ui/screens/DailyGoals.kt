@@ -77,8 +77,9 @@ fun DailyGoalsScreen(
         fatPerc = lipidsPercentage
     )
 
-    val macros = remember(request) { viewModel.previewMacros(request) }
-
+    val macros = remember(request) {
+        viewModel.previewMacros(request)
+    }
     MaterialTheme {
         Column(
             modifier = Modifier
@@ -114,7 +115,7 @@ fun DailyGoalsScreen(
                 name = "Carboidratos",
                 percentage = carbohydrates,
                 onPercentageChange = { carbohydrates = it },
-                grams = macros.carb?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
+                grams = macros?.carb?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
                 nutrientColor = Carbohydrates
             )
 
@@ -122,7 +123,7 @@ fun DailyGoalsScreen(
                 name = "Proteínas",
                 percentage = proteins,
                 onPercentageChange = { proteins = it },
-                grams =macros.protein?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
+                grams =macros?.protein?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
                 nutrientColor = Proteins
             )
 
@@ -130,7 +131,7 @@ fun DailyGoalsScreen(
                 name = "Lipídios",
                 percentage = lipids,
                 onPercentageChange = { lipids = it },
-                grams = macros.fat?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
+                grams = macros?.fat?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
                 nutrientColor = Lipids
             )
 
