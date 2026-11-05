@@ -26,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.klab.app.domain.dto.meal.MealPlanRequest
 import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.ui.components.*
+import com.klab.app.ui.components.cards.MacronutrientCard
 import com.klab.app.ui.theme.*
 import com.klab.app.ui.viewModel.MealPlanViewModel
 import org.koin.compose.koinInject
