@@ -1,5 +1,4 @@
-
-package com.klab.app.ui.components
+package com.klab.app.ui.components.cards
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.klab.app.ui.components.PercentageInput
 import com.klab.app.ui.theme.*
 
 @Composable

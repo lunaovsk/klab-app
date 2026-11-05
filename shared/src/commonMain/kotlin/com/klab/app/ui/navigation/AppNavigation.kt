@@ -27,6 +27,15 @@ fun AppNavigation() {
 
         composable(AppRoutes.DAILY_GOALS) {
             DailyGoalsScreen(
+                onContinue = {
+                    navController.navigate(
+                        AppRoutes.MEAL_DISTRI
+                    )
+                }
+            )
+        }
+        composable(AppRoutes.MEAL_DISTRI) {
+            MealDistributionScreen(
                 onContinue = {}
             )
         }
