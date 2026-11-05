@@ -39,10 +39,10 @@ fun DailyGoalsScreen(
     val viewModel: MealPlanViewModel = viewModel(
         factory = MealPlanViewModel.factory(mealPlanService)
     )
-    var dailyCalories by remember { mutableStateOf("2000") }
-    var carbohydrates by remember { mutableStateOf("50") }
-    var proteins by remember { mutableStateOf("20") }
-    var lipids by remember { mutableStateOf("30") }
+    var dailyCalories by remember { mutableStateOf("") }
+    var carbohydrates by remember { mutableStateOf("") }
+    var proteins by remember { mutableStateOf("") }
+    var lipids by remember { mutableStateOf("") }
     var planTitle by remember { mutableStateOf("") }
 
     val uiState by viewModel.uiState.collectAsState()
@@ -97,7 +97,12 @@ fun DailyGoalsScreen(
             SubText(
                 text = "Defina a meta energética e a distribuição dos macronutrientes."
             )
-
+            TextInput(
+                value = planTitle,
+                onValueChange = { planTitle = it },
+                label = "Nome da meta",
+                placeholder = "Nome plano alimentar"
+            )
             NumericInput(
                 label = "Meta calórica diária (kcal)",
                 value = dailyCalories,

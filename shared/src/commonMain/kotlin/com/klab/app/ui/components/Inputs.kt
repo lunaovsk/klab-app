@@ -80,3 +80,34 @@ fun PercentageInput(
             )
     )
 }
+
+@Composable
+fun TextInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        label = {
+            Text(label)
+        },
+        placeholder = {
+            Text(placeholder)
+        },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text
+        ),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MainTexts,
+            unfocusedBorderColor = MainTexts.copy(alpha = 0.35f),
+            focusedTextColor = MainTexts,
+            unfocusedTextColor = MainTexts
+        )
+    )
+}
