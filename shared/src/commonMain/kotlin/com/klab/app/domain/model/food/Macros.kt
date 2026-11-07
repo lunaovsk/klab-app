@@ -7,6 +7,21 @@ class Macros (
     val fat: Float
 
 ) {
+    companion object {
+
+        fun fromCalories(calories: Float,
+            carbPercentage: Int,
+            proteinPercentage: Int,
+            fatPercentage: Int): Macros {
+            return Macros(
+                calorie = calories,
+                carb = (calories * carbPercentage / 100f) / 4f,
+                protein = (calories * proteinPercentage / 100f) / 4f,
+                fat = (calories * fatPercentage / 100f) / 9f
+            )
+        }
+    }
+
     fun calculateForPortion(amount: Float): Macros {
         val value = amount / 100f
         return Macros(

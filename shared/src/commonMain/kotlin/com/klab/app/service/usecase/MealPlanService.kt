@@ -4,16 +4,20 @@ import com.klab.app.domain.dto.meal.MealPlanRequest
 import com.klab.app.domain.model.food.Macros
 import com.klab.app.domain.model.meal.MealPlan
 import com.klab.app.domain.repository.MealPlanRepository
+import com.klab.app.domain.validation.DailyGoalsPlan
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
 
 class MealPlanService (
     private val mealPlanRepository: MealPlanRepository,
+    private val percentageValidator: DailyGoalsPlan
 ) {
 
     suspend fun create(request: MealPlanRequest): MealPlan {
-        require(request.carbosPerc + request.proteinPerc + request.fatPerc == 100)
+
+        percentageValidator.validate(request)
+
         val goal = calculateMacros(request)
         val mealPlan = MealPlan(
             title = request.title,
@@ -25,17 +29,14 @@ class MealPlanService (
         return MealPlan(plan.id, plan.title, plan.createdAt, plan.goal, plan.meals, plan.isActive)
     }
     private fun calculateMacros(request: MealPlanRequest): Macros {
-        require(request.calories>0)
-
-        //cada grama de carb e protein possuem 4kcal e lipidios possuem 9kcal
-        return Macros(
-            calorie = request.calories,
-            carb = (request.calories*request.carbosPerc/100)/4,
-            protein = (request.calories*request.proteinPerc/100)/4,
-            fat = (request.calories*request.fatPerc/100)/9
+        return Macros.fromCalories(calories = request.calories,
+            carbPercentage = request.carbosPerc,
+            proteinPercentage = request.proteinPerc,
+            fatPercentage = request.fatPerc
         )
     }
     fun previewMacros (request: MealPlanRequest): Macros{
+        percentageValidator.validateForPreview(request)
         return calculateMacros(request)
     }
 
