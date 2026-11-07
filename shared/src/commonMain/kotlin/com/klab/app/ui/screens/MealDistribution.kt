@@ -12,6 +12,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.klab.app.domain.dto.meal.MealDistribRequest
+import com.klab.app.domain.dto.meal.MealPlanRequest
+import com.klab.app.domain.model.enumModel.MealType
+import com.klab.app.service.usecase.MealService
 import com.klab.app.ui.components.MainButton
 import com.klab.app.ui.components.NumericInput
 import com.klab.app.ui.components.SectionTitle
@@ -28,22 +35,37 @@ import com.klab.app.ui.components.SubText
 import com.klab.app.ui.components.cards.MealCard
 import com.klab.app.ui.theme.BackgroundColor
 import com.klab.app.ui.theme.Errors
+import com.klab.app.ui.viewModel.MealDistributionViewModel
+import org.koin.compose.koinInject
 
-private val mealOptions = listOf(
-    "Café da manhã",
-    "Lanche da manhã",
-    "Almoço",
-    "Lanche da tarde",
-    "Jantar",
-    "Ceia"
+
+private data class MealOption(
+    val title: String,
+    val type: MealType
 )
+
 private data class Meal(
     val title: String = "",
     val percentage: String = ""
 )
 @Composable
 @Preview
-fun MealDistributionScreen(onContinue: () -> Unit = {}) {
+fun MealDistributionScreen(planId: Long, onContinue: () -> Unit = {}) {
+    val mealService: MealService = koinInject()
+
+    val viewModel: MealDistributionViewModel = viewModel(
+        factory = MealDistributionViewModel.factory(mealService)
+    )
+    val mealOptions = listOf(
+        MealOption("Café da manhã", MealType.BREAKFAST),
+        MealOption("Lanche da manhã", MealType.SNACK),
+        MealOption("Almoço", MealType.LUNCH),
+        MealOption("Lanche da tarde", MealType.SNACK),
+        MealOption("Jantar", MealType.DINNER),
+        MealOption("Ceia", MealType.OTHER)
+    )
+
+    val uiState by viewModel.uiState.collectAsState()
 
     var mealCount by remember { mutableStateOf("") }
 
@@ -64,6 +86,13 @@ fun MealDistributionScreen(onContinue: () -> Unit = {}) {
                             (it.percentage.toIntOrNull() in 0..100)
                 } &&
                 isDistributionValid
+
+    LaunchedEffect(uiState.createdMeals) {
+        if (uiState.createdMeals != null) {
+            viewModel.consumeCreatedMeals()
+            onContinue()
+        }
+    }
 
     MaterialTheme {
         Column(
@@ -120,25 +149,44 @@ fun MealDistributionScreen(onContinue: () -> Unit = {}) {
                 )
 
                 meals.forEachIndexed { index, meal ->
-
                     val availableTitles = mealOptions.filter { option ->
-                        option == meal.title ||
-                                meals.none { it.title == option }
-                    }
+                            option.title == meal.title || meals.none { it.title == option.title }
+                        }
+                        .map { it.title }
+                    val mealMacros = uiState.mealMacros[index]
+
 
                     MealCard(
                         title = meal.title,
-                        onTitleChange = { newTitle ->
-                            meals[index] = meal.copy(
+                        onTitleChange = { newTitle -> meals[index] = meal.copy(
                                 title = newTitle
                             )
                         },
                         percentage = meal.percentage,
                         onPercentageChange = { newPercentage ->
-                            meals[index] = meal.copy(
-                                percentage = newPercentage
-                            )
+                            meals[index] = meal.copy(percentage = newPercentage)
+
+                            val percentage = newPercentage.toIntOrNull()
+
+                            if (percentage != null && percentage in 1..100) {
+
+
+                                viewModel.previewMacros(
+                                    planId = planId,
+                                    request = MealDistribRequest(
+                                        name = meal.title,
+                                        type = mealOptions.firstOrNull { it.title == meal.title }?.type?: MealType.OTHER,
+                                        percentage = percentage,
+                                        displayOrder = index + 1
+                                    ),
+                                        index = index
+                                    )
+                                }
                         },
+                        calories = mealMacros?.calorie?.toString() ?: "--",
+                        carbohydrates = mealMacros?.carb?.toString() ?: "--",
+                        proteins = mealMacros?.protein?.toString() ?: "--",
+                        lipids = mealMacros?.fat?.toString() ?: "--",
                         availableTitles = availableTitles
                     )
                 }
@@ -155,12 +203,39 @@ fun MealDistributionScreen(onContinue: () -> Unit = {}) {
                 }
             }
 
+            uiState.error?.let { error ->
+                SubText(
+                    text = error,
+                    color = Errors
+                )
+            }
+
             Spacer(modifier = Modifier.height(4.dp))
 
             MainButton(
-                text = "Continuar",
-                onClick = onContinue,
-                enabled = isFormValid,
+                text = if (uiState.isLoading) {
+                    "Salvando..."
+                } else {
+                    "Continuar"
+                },
+                onClick = {
+
+                    val requests = meals.mapIndexed { index, meal ->
+                        val selectedOption = mealOptions.first { it.title == meal.title }
+                        MealDistribRequest(
+                            name = meal.title,
+                            type = selectedOption.type,
+                            percentage = meal.percentage.toInt(),
+                            displayOrder = index + 1
+                        )
+                    }
+
+                    viewModel.createMeals(
+                        planId = planId,
+                        requests = requests
+                    )
+                },
+                enabled = isFormValid && !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             )
         }

@@ -24,6 +24,7 @@ class MealPlanViewModel( private val mealPlanService: MealPlanService): ViewMode
     }
 
     fun createMealPlan(request: MealPlanRequest) {
+        if (changeUiState.value.isLoading) return
         viewModelScope.launch {
             changeUiState.value = MealPlanState(isLoading = true)
 
@@ -38,6 +39,9 @@ class MealPlanViewModel( private val mealPlanService: MealPlanService): ViewMode
                 )
             }
         }
+    }
+    fun consumeCreatedPlan() {
+        changeUiState.value = changeUiState.value.copy(createdPlan = null)
     }
     companion object {
         fun factory(mealPlanService: MealPlanService): ViewModelProvider.Factory =

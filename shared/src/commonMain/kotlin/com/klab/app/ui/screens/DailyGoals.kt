@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,19 +35,26 @@ import org.koin.compose.koinInject
 @Composable
 @Preview
 fun DailyGoalsScreen(
-    onContinue: (MealPlanRequest) -> Unit = {}
+    onContinue: (Long) -> Unit = {}
 ) {
     val mealPlanService: MealPlanService = koinInject()
     val viewModel: MealPlanViewModel = viewModel(
         factory = MealPlanViewModel.factory(mealPlanService)
     )
-    var dailyCalories by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
+
+    var dailyCalories by remember { mutableStateOf("2000") }
     var carbohydrates by remember { mutableStateOf("") }
     var proteins by remember { mutableStateOf("") }
     var lipids by remember { mutableStateOf("") }
     var planTitle by remember { mutableStateOf("") }
 
-    val uiState by viewModel.uiState.collectAsState()
+    LaunchedEffect(uiState.createdPlan) {
+        uiState.createdPlan?.let { plan ->
+            viewModel.consumeCreatedPlan()
+            onContinue(plan.id)
+        }
+    }
 
     val calories = dailyCalories.toFloatOrNull() ?: 0f
 
@@ -79,7 +87,11 @@ fun DailyGoalsScreen(
     )
 
     val macros = remember(request) {
-        viewModel.previewMacros(request)
+        if (calories > 0f) {
+            viewModel.previewMacros(request)
+        } else {
+            null
+        }
     }
     MaterialTheme {
         Column(
@@ -155,19 +167,11 @@ fun DailyGoalsScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             MainButton(
-                text = "Continuar",
+                text = if (uiState.isLoading) "Salvando..." else "Continuar",
                 onClick = {
-                    val request = MealPlanRequest(
-                        title = planTitle.trim(),
-                        calories = calories,
-                        carbosPerc = carbohydratesPercentage,
-                        proteinPerc = proteinsPercentage,
-                        fatPerc = lipidsPercentage
-                    )
-
-                    onContinue(request)
+                    viewModel.createMealPlan(request)
                 },
-                enabled = isFormValid,
+                enabled = isFormValid && !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             )
         }
