@@ -13,6 +13,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,19 +23,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
-
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.klab.app.domain.dto.meal.MealPlanRequest
+import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.ui.components.*
+import com.klab.app.ui.components.cards.MacronutrientCard
 import com.klab.app.ui.theme.*
+import com.klab.app.ui.viewModel.meal.MealPlanViewModel
+import org.koin.compose.koinInject
 
 @Composable
 @Preview
-fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
-    var dailyCalories by remember { mutableStateOf("2000") }
-    var carbohydrates by remember { mutableStateOf("50") }
-    var proteins by remember { mutableStateOf("20") }
-    var lipids by remember { mutableStateOf("30") }
+fun DailyGoalsScreen(
+    onContinue: (Long) -> Unit = {}
+) {
+    val mealPlanService: MealPlanService = koinInject()
+    val viewModel: MealPlanViewModel = viewModel(
+        factory = MealPlanViewModel.factory(mealPlanService)
+    )
+    val uiState by viewModel.uiState.collectAsState()
 
-    val calories = dailyCalories.toDoubleOrNull() ?: 0.0
+    var dailyCalories by remember { mutableStateOf("") }
+    var carbohydrates by remember { mutableStateOf("") }
+    var proteins by remember { mutableStateOf("") }
+    var lipids by remember { mutableStateOf("") }
+    var planTitle by remember { mutableStateOf("") }
+
+    LaunchedEffect(uiState.createdPlan) {
+        uiState.createdPlan?.let { plan ->
+            viewModel.consumeCreatedPlan()
+            onContinue(plan.id)
+        }
+    }
+
+    val calories = dailyCalories.toFloatOrNull() ?: 0f
 
     val carbohydratesPercentage = carbohydrates.toIntOrNull() ?: 0
     val proteinsPercentage = proteins.toIntOrNull() ?: 0
@@ -45,15 +68,29 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
     val isDistributionValid = totalPercentage == 100
 
     val isFormValid =
-        calories > 0 &&
-                dailyCalories.isNotBlank() &&
-                carbohydrates.toIntOrNull() != null &&
-                proteins.toIntOrNull() != null &&
-                lipids.toIntOrNull() != null &&
-                carbohydratesPercentage in 0..100 &&
-                proteinsPercentage in 0..100 &&
-                lipidsPercentage in 0..100 &&
-                isDistributionValid
+        calories > 0f &&
+        planTitle.isNotBlank() &&
+        carbohydrates.toIntOrNull() != null &&
+        proteins.toIntOrNull() != null &&
+        lipids.toIntOrNull() != null &&
+        carbohydratesPercentage in 0..100 &&
+        proteinsPercentage in 0..100 &&
+        lipidsPercentage in 0..100 &&
+        isDistributionValid
+
+    val request = MealPlanRequest(
+        title = planTitle.trim(),
+        calories = calories,
+        carbosPerc = carbohydratesPercentage,
+        proteinPerc = proteinsPercentage,
+        fatPerc = lipidsPercentage
+    )
+
+    val macros = remember(request) {
+        if (calories > 0f) {
+            runCatching { viewModel.previewMacros(request) }.getOrNull()
+        } else null
+    }
     MaterialTheme {
         Column(
             modifier = Modifier
@@ -71,7 +108,12 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
             SubText(
                 text = "Defina a meta energética e a distribuição dos macronutrientes."
             )
-
+            TextInput(
+                value = planTitle,
+                onValueChange = { planTitle = it },
+                label = "Nome da meta",
+                placeholder = "Nome plano alimentar"
+            )
             NumericInput(
                 label = "Meta calórica diária (kcal)",
                 value = dailyCalories,
@@ -89,7 +131,7 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
                 name = "Carboidratos",
                 percentage = carbohydrates,
                 onPercentageChange = { carbohydrates = it },
-                grams = "--",
+                grams = macros?.carb?.toString() ?: "--",
                 nutrientColor = Carbohydrates
             )
 
@@ -97,7 +139,7 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
                 name = "Proteínas",
                 percentage = proteins,
                 onPercentageChange = { proteins = it },
-                grams = "--",
+                grams = macros?.protein?.toString() ?: "--",
                 nutrientColor = Proteins
             )
 
@@ -105,7 +147,7 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
                 name = "Lipídios",
                 percentage = lipids,
                 onPercentageChange = { lipids = it },
-                grams = "--",
+                grams = macros?.fat?.toString() ?: "--",
                 nutrientColor = Lipids
             )
 
@@ -123,9 +165,11 @@ fun DailyGoalsScreen(onContinue: () -> Unit = {}) {
             Spacer(modifier = Modifier.height(4.dp))
 
             MainButton(
-                text = "Continuar",
-                onClick = onContinue,
-                enabled = isFormValid,
+                text = if (uiState.isLoading) "Salvando..." else "Continuar",
+                onClick = {
+                    viewModel.createMealPlan(request)
+                },
+                enabled = isFormValid && !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             )
         }
