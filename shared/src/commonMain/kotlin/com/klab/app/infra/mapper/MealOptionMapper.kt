@@ -1,5 +1,7 @@
 package com.klab.app.infra.mapper
 
+import com.klab.app.domain.dto.meal.MealOptionResponse
+import com.klab.app.domain.model.meal.MealItem
 import com.klab.app.domain.model.meal.MealOption
 import com.klab.app.infra.local.MealItemEntity
 import com.klab.app.infra.local.MealOptionEntity
@@ -29,5 +31,14 @@ fun OptionsWithItem.toDomain(): MealOption {
         title = this.option.title,
         displayOrder = this.option.displayOrder,
         items = this.items.map(MealItemEntity::toDomain).toMutableSet()
+    )
+}
+
+fun MealOption.toResponse(): MealOptionResponse {
+    return MealOptionResponse(
+        id = this.id,
+        title = this.title,
+        displayOrder = this.displayOrder,
+        items = this.items.map(MealItem::toResponse).toSet()
     )
 }
