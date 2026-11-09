@@ -1,11 +1,9 @@
-
 package com.klab.app.ui.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -17,10 +15,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.savedstate.read
+import com.klab.app.service.usecase.FoodService
+import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.ui.screens.*
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    foodService: FoodService? = null,
+    mealPlanService: MealPlanService? = null
+) {
     val navController = rememberNavController()
 
     Box(
@@ -30,6 +33,7 @@ fun AppNavigation() {
                 WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
             )
     ) {
+
         NavHost(
             navController = navController,
             startDestination = AppRoutes.HOME
@@ -78,6 +82,23 @@ fun AppNavigation() {
                     onMealClick = {}
                 )
             }
+
+            composable(AppRoutes.SEARCH_FOOD) {
+                FoodSearchScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onFoodsSelected = { foods ->
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("selected_food_ids", foods.map { it.food.id})
+
+                        navController.popBackStack()
+                    }
+
+                )
+            }
+
         }
     }
 }
