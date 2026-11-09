@@ -5,12 +5,12 @@ import com.klab.app.domain.model.enumModel.MealType
 
 class Meal (
 
-    val id: Long,
+    val id: Long = 0L,
     val name: String,
     val type: MealType,
     val displayOrder: Int,
     val goal: Macros,
-    val options: MutableSet<MealOption>
+    val options: MutableSet<MealOption> = mutableSetOf()
 
 ) {
     init {

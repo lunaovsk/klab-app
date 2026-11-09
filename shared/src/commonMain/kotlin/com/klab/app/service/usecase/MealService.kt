@@ -23,12 +23,10 @@ class MealService(
         return requests.map { request ->
 
             val meal = Meal(
-                id = 0L,
                 name = request.name,
                 type = request.type,
                 displayOrder = request.displayOrder,
                 goal = plan.goal.calculateForPortion(amount = request.percentage.toFloat()),
-                options = mutableSetOf()
             )
 
             mealRepository.add(meal, planId)

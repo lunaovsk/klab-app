@@ -7,17 +7,20 @@ class Macros (
     val fat: Float
 
 ) {
-    companion object {
 
+    companion object {
+        private fun roundMacro(value: Float): Float {
+            return kotlin.math.round(value * 100) / 100
+        }
         fun fromCalories(calories: Float,
             carbPercentage: Int,
             proteinPercentage: Int,
             fatPercentage: Int): Macros {
             return Macros(
                 calorie = calories,
-                carb = (calories * carbPercentage / 100f) / 4f,
-                protein = (calories * proteinPercentage / 100f) / 4f,
-                fat = (calories * fatPercentage / 100f) / 9f
+                carb = roundMacro((calories * carbPercentage / 100f) / 4f),
+                protein = roundMacro((calories * proteinPercentage / 100f) / 4f),
+                fat = roundMacro((calories * fatPercentage / 100f) / 9f)
             )
         }
     }
@@ -26,9 +29,9 @@ class Macros (
         val value = amount / 100f
         return Macros(
             calorie = this.calorie * value,
-            carb = this.carb * value,
-            protein = this.protein * value,
-            fat = this.fat * value
+            carb = roundMacro(this.carb * value),
+            protein = roundMacro(this.protein * value),
+            fat = roundMacro(this.fat * value)
         )
     }
 
