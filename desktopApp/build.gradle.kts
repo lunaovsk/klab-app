@@ -11,7 +11,7 @@ dependencies {
 
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutinesSwing)
-
+    implementation(compose.components.resources)
     implementation(libs.compose.uiToolingPreview)
 }
 
@@ -23,6 +23,17 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.klab.app"
             packageVersion = "1.0.0"
+            windows {
+                iconFile.set(project.file("src/main/kotlin/resources/icon.ico"))
+            }
+
+            macOS {
+                iconFile.set(project.file("src/main/kotlin/resources/icon.icns"))
+            }
+
+            linux {
+                iconFile.set(project.file("src/main/kotlin/resources/icon.png"))
+            }
         }
     }
 }
