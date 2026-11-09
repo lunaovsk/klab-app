@@ -63,7 +63,19 @@ fun AppNavigation() {
 
                 MealDistributionScreen(
                     planId = planId,
-                    onContinue = {}
+                    onContinue = { navController.navigate("planning/$planId")}
+                )
+            }
+            composable(AppRoutes.PLANNING_OVERVIEW,arguments = listOf(
+                navArgument("planId") { type = NavType.LongType }
+            )) {backStackEntry ->
+
+                val planId = backStackEntry.arguments
+                    ?.read { getLongOrNull("planId") }
+                    ?: return@composable
+                PlanningOverviewScreen(
+                    planId = planId,
+                    onMealClick = {}
                 )
             }
         }

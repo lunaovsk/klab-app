@@ -37,4 +37,7 @@ class MealService(
 
         return plan.goal.calculateForPortion(amount = request.percentage.toFloat())
     }
+    suspend fun getMealsByPlanId(planId: Long): List<Meal> {
+        return mealRepository.findByPlanId(planId)
+    }
 }
