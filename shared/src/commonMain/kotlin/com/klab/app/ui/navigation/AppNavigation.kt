@@ -41,23 +41,8 @@ fun AppNavigation(
             composable(AppRoutes.HOME) {
                 HomeScreen(
                     onStartPlanning = {
-                        navController.navigate(AppRoutes.SEARCH_FOOD)
+                        navController.navigate(AppRoutes.DAILY_GOALS)
                     }
-                )
-            }
-            composable(AppRoutes.SEARCH_FOOD) {
-                FoodSearchScreen(
-                    onBack = {
-                        navController.popBackStack()
-                    },
-                    onFoodsSelected = { foods ->
-                        navController.previousBackStackEntry
-                            ?.savedStateHandle
-                            ?.set("selected_food_ids", foods.map { it.id })
-
-                        navController.popBackStack()
-                    }
-
                 )
             }
 
@@ -97,6 +82,23 @@ fun AppNavigation(
                     onMealClick = {}
                 )
             }
+
+            composable(AppRoutes.SEARCH_FOOD) {
+                FoodSearchScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onFoodsSelected = { foods ->
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("selected_food_ids", foods.map { it.food.id})
+
+                        navController.popBackStack()
+                    }
+
+                )
+            }
+
         }
     }
 }

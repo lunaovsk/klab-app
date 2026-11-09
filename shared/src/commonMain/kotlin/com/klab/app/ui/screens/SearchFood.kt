@@ -3,26 +3,31 @@ package com.klab.app.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.klab.app.domain.model.food.Food
 import com.klab.app.service.usecase.FoodService
+import com.klab.app.ui.components.FoodQuantityDialog
 import com.klab.app.ui.components.FoodSearchField
 import com.klab.app.ui.components.cards.FoodResultItem
 import com.klab.app.ui.theme.*
 import com.klab.app.ui.viewModel.food.FoodSearchViewModel
 import org.koin.compose.koinInject
 
+data class FoodSelection(
+    val food: Food,
+    val grams: Float
+)
+
 @Composable
 fun FoodSearchScreen(
     onBack: () -> Unit,
-    onFoodsSelected: (List<Food>) -> Unit,
+    onFoodsSelected: (List<FoodSelection>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val foodService: FoodService = koinInject()
@@ -35,7 +40,11 @@ fun FoodSearchScreen(
     val foods = viewModel.foods.collectAsLazyPagingItems()
 
     val selectedFoods = remember {
-        mutableStateListOf<Food>()
+        mutableStateListOf<FoodSelection>()
+    }
+
+    var foodToConfigure by remember {
+        mutableStateOf<Food?>(null)
     }
 
     Column(
@@ -87,7 +96,6 @@ fun FoodSearchScreen(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
             items(
                 count = foods.itemCount,
                 key = { index ->
@@ -98,55 +106,68 @@ fun FoodSearchScreen(
                 val food = foods[index]
 
                 if (food != null) {
+
                     val isSelected = selectedFoods.any {
-                        it.id == food.id
+                        it.food.id == food.id
                     }
 
                     FoodResultItem(
                         food = food,
                         isSelected = isSelected,
-                        onSelect = {
-                            if (isSelected) {
-                                selectedFoods.removeAll {
-                                    it.id == food.id
-                                }
-                            } else {
-                                selectedFoods.add(food)
-                            }
-                        }
+                        onSelect = { foodToConfigure = food }
                     )
                 }
             }
 
             if (foods.loadState.append is androidx.paging.LoadState.Loading) {
                 item {
-                    Box(
-                        modifier = Modifier
+                    Box(modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        contentAlignment = androidx.compose.ui.Alignment.Center
+                        contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(
-                            color = GreenDetails
-                        )
+                        CircularProgressIndicator(color = GreenDetails)
                     }
                 }
             }
         }
 
         Button(
-            onClick = {
-                onFoodsSelected(selectedFoods.toList())
-            },
+            onClick = { onFoodsSelected(selectedFoods.toList()) },
             enabled = selectedFoods.isNotEmpty(),
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = GreenDetails
             )
         ) {
-            Text(
-                text = "Adicionar ${selectedFoods.size} alimentos"
-            )
+            Text(text = "Adicionar ${selectedFoods.size} alimentos")
         }
+    }
+
+    foodToConfigure?.let { food ->
+
+        val existingSelection = selectedFoods.find {
+            it.food.id == food.id
+        }
+
+        FoodQuantityDialog(
+            food = food,
+            initialGrams = existingSelection?.grams ?: 100f,
+            onDismiss = { foodToConfigure = null },
+            onConfirm = { grams ->
+
+                val selection = FoodSelection(food = food, grams = grams)
+
+                val index = selectedFoods.indexOfFirst { it.food.id == food.id }
+
+                if (index >= 0) {
+                    selectedFoods[index] = selection
+                } else {
+                    selectedFoods.add(selection)
+                }
+
+                foodToConfigure = null
+            }
+        )
     }
 }

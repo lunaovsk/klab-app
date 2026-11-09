@@ -1,9 +1,13 @@
 package com.klab.app
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import com.klab.app.di.appDatabaseBuilder
 import com.klab.app.di.appModule
+import com.klab.app.infra.dao.FoodDao
+import com.klab.app.infra.database.KlabDatabase
+import com.klab.app.infra.database.seed.tbcaSeed
 import com.klab.app.service.usecase.FoodService
 import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.ui.navigation.AppNavigation
@@ -18,9 +22,14 @@ fun App() {
         KoinApplication(application = {
             modules(appModule(builder))
         }) {
+            val database: KlabDatabase = koinInject()
+            val foodDao: FoodDao = koinInject()
+            LaunchedEffect(Unit) {
+                tbcaSeed(database, foodDao)
+            }
             AppNavigation()
         }
-    } else {
-        AppNavigation()
+
     }
+
 }
