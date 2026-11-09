@@ -29,7 +29,7 @@ import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.ui.components.*
 import com.klab.app.ui.components.cards.MacronutrientCard
 import com.klab.app.ui.theme.*
-import com.klab.app.ui.viewModel.MealPlanViewModel
+import com.klab.app.ui.viewModel.meal.MealPlanViewModel
 import org.koin.compose.koinInject
 
 @Composable
@@ -43,7 +43,7 @@ fun DailyGoalsScreen(
     )
     val uiState by viewModel.uiState.collectAsState()
 
-    var dailyCalories by remember { mutableStateOf("2000") }
+    var dailyCalories by remember { mutableStateOf("") }
     var carbohydrates by remember { mutableStateOf("") }
     var proteins by remember { mutableStateOf("") }
     var lipids by remember { mutableStateOf("") }
@@ -88,10 +88,8 @@ fun DailyGoalsScreen(
 
     val macros = remember(request) {
         if (calories > 0f) {
-            viewModel.previewMacros(request)
-        } else {
-            null
-        }
+            runCatching { viewModel.previewMacros(request) }.getOrNull()
+        } else null
     }
     MaterialTheme {
         Column(
@@ -133,7 +131,7 @@ fun DailyGoalsScreen(
                 name = "Carboidratos",
                 percentage = carbohydrates,
                 onPercentageChange = { carbohydrates = it },
-                grams = macros?.carb?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
+                grams = macros?.carb?.toString() ?: "--",
                 nutrientColor = Carbohydrates
             )
 
@@ -141,7 +139,7 @@ fun DailyGoalsScreen(
                 name = "Proteínas",
                 percentage = proteins,
                 onPercentageChange = { proteins = it },
-                grams =macros?.protein?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
+                grams = macros?.protein?.toString() ?: "--",
                 nutrientColor = Proteins
             )
 
@@ -149,7 +147,7 @@ fun DailyGoalsScreen(
                 name = "Lipídios",
                 percentage = lipids,
                 onPercentageChange = { lipids = it },
-                grams = macros?.fat?.let { "${kotlin.math.round(it * 10) / 10f}" } ?: "--",
+                grams = macros?.fat?.toString() ?: "--",
                 nutrientColor = Lipids
             )
 

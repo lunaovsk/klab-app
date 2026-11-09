@@ -1,14 +1,13 @@
-package com.klab.app.ui.viewModel
+package com.klab.app.ui.viewModel.meal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.klab.app.domain.dto.MacrosDTO
 import com.klab.app.domain.dto.meal.MealPlanRequest
-import com.klab.app.domain.model.food.Macros
 import com.klab.app.service.usecase.MealPlanService
-import com.klab.app.ui.viewModel.meal.MealPlanState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +18,7 @@ class MealPlanViewModel( private val mealPlanService: MealPlanService): ViewMode
     private val changeUiState = MutableStateFlow(MealPlanState())
     val uiState: StateFlow<MealPlanState> = changeUiState.asStateFlow()
 
-    fun previewMacros(request: MealPlanRequest): Macros {
+    fun previewMacros(request: MealPlanRequest): MacrosDTO {
         return mealPlanService.previewMacros(request)
     }
 

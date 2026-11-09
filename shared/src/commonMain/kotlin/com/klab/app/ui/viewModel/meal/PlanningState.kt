@@ -1,9 +1,9 @@
 package com.klab.app.ui.viewModel.meal
 
-import com.klab.app.domain.model.meal.Meal
+import com.klab.app.domain.dto.meal.MealResponse
 
 data class PlanningState(
     val isLoading: Boolean = false,
-    val meals: List<Meal> = emptyList(),
+    val meals: List<MealResponse> = emptyList(),
     val error: String? = null
 )

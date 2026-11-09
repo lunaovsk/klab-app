@@ -20,7 +20,11 @@ import org.koin.compose.koinInject
 import androidx.compose.runtime.getValue
 
 @Composable
-fun PlanningOverviewScreen(planId: Long,modifier: Modifier = Modifier) {
+fun PlanningOverviewScreen(
+    planId: Long,
+    onMealClick: (Long) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
 
     val mealService: MealService = koinInject()
     val viewModel: PlanningViewModel = viewModel(factory = PlanningViewModel.factory(mealService))
@@ -95,7 +99,7 @@ fun PlanningOverviewScreen(planId: Long,modifier: Modifier = Modifier) {
                         title = meal.name,
                         optionsCount = meal.options.size,
                         calories = meal.goal.calorie.toString(),
-                        onClick = {}
+                        onClick = { onMealClick(meal.id) }
                     )
                 }
             }
