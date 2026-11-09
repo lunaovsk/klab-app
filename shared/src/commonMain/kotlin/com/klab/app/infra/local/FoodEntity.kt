@@ -7,7 +7,8 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "tb_tbca")
 class FoodEntity (
 
-    @PrimaryKey val id: Long = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
     val description: String,
     val group: String,
     @Embedded(prefix = "food_") val macrosEntity: MacrosEntity
