@@ -15,6 +15,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,29 +26,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.klab.app.domain.model.food.Macros
-import com.klab.app.domain.model.meal.MealPlan
+
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.klab.app.domain.dto.meal.MealPlanRequest
 import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.ui.components.*
+import com.klab.app.ui.components.cards.MacronutrientCard
 import com.klab.app.ui.theme.*
-import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
-import kotlin.time.Clock
+import com.klab.app.ui.viewModel.meal.MealPlanViewModel
+import org.koin.compose.koinInject
 
 @Composable
 @Preview
 fun DailyGoalsScreen(
-    mealPlanService: MealPlanService? = null,
-    onContinue: () -> Unit = {}
+    onContinue: (Long) -> Unit = {}
 ) {
-    val coroutineScope = rememberCoroutineScope()
+    val mealPlanService: MealPlanService = koinInject()
+    val viewModel: MealPlanViewModel = viewModel(
+        factory = MealPlanViewModel.factory(mealPlanService)
+    )
+    val uiState by viewModel.uiState.collectAsState()
 
-    var title by remember { mutableStateOf("") }
     var dailyCalories by remember { mutableStateOf("") }
     var carbohydrates by remember { mutableStateOf("") }
     var proteins by remember { mutableStateOf("") }
     var lipids by remember { mutableStateOf("") }
+
+    var planTitle by remember { mutableStateOf("") }
+
+    LaunchedEffect(uiState.createdPlan) {
+        uiState.createdPlan?.let { plan ->
+            viewModel.consumeCreatedPlan()
+            onContinue(plan.id)
+        }
+    }
 
     val calories = dailyCalories.toFloatOrNull() ?: 0f
 
@@ -60,17 +73,29 @@ fun DailyGoalsScreen(
     val isDistributionValid = totalPercentage == 100
 
     val isFormValid =
-        title.isNotBlank() &&
-                calories > 0f &&
-                dailyCalories.isNotBlank() &&
-                carbohydrates.toIntOrNull() != null &&
-                proteins.toIntOrNull() != null &&
-                lipids.toIntOrNull() != null &&
-                carbohydratesPercentage in 0..100 &&
-                proteinsPercentage in 0..100 &&
-                lipidsPercentage in 0..100 &&
-                isDistributionValid
+        calories > 0f &&
+        planTitle.isNotBlank() &&
+        carbohydrates.toIntOrNull() != null &&
+        proteins.toIntOrNull() != null &&
+        lipids.toIntOrNull() != null &&
+        carbohydratesPercentage in 0..100 &&
+        proteinsPercentage in 0..100 &&
+        lipidsPercentage in 0..100 &&
+        isDistributionValid
 
+    val request = MealPlanRequest(
+        title = planTitle.trim(),
+        calories = calories,
+        carbosPerc = carbohydratesPercentage,
+        proteinPerc = proteinsPercentage,
+        fatPerc = lipidsPercentage
+    )
+
+    val macros = remember(request) {
+        if (calories > 0f) {
+            runCatching { viewModel.previewMacros(request) }.getOrNull()
+        } else null
+    }
     MaterialTheme {
         Column(
             modifier = Modifier
@@ -89,20 +114,12 @@ fun DailyGoalsScreen(
                 text = "Defina a meta energética e a distribuição dos macronutrientes."
             )
 
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Título do planejamento") },
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MainTexts,
-                    unfocusedBorderColor = MainTexts.copy(alpha = 0.35f),
-                    focusedTextColor = MainTexts,
-                    unfocusedTextColor = MainTexts
-                )
+            TextInput(
+                value = planTitle,
+                onValueChange = { planTitle = it },
+                label = "Nome da meta",
+                placeholder = "Nome plano alimentar"
             )
-
             NumericInput(
                 label = "Meta calórica diária (kcal)",
                 value = dailyCalories,
@@ -120,7 +137,7 @@ fun DailyGoalsScreen(
                 name = "Carboidratos",
                 percentage = carbohydrates,
                 onPercentageChange = { carbohydrates = it },
-                grams = "--",
+                grams = macros?.carb?.toString() ?: "--",
                 nutrientColor = Carbohydrates
             )
 
@@ -128,7 +145,7 @@ fun DailyGoalsScreen(
                 name = "Proteínas",
                 percentage = proteins,
                 onPercentageChange = { proteins = it },
-                grams = "--",
+                grams = macros?.protein?.toString() ?: "--",
                 nutrientColor = Proteins
             )
 
@@ -136,7 +153,7 @@ fun DailyGoalsScreen(
                 name = "Lipídios",
                 percentage = lipids,
                 onPercentageChange = { lipids = it },
-                grams = "--",
+                grams = macros?.fat?.toString() ?: "--",
                 nutrientColor = Lipids
             )
 
@@ -154,25 +171,11 @@ fun DailyGoalsScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             MainButton(
-                text = "Continuar",
+                text = if (uiState.isLoading) "Salvando..." else "Continuar",
                 onClick = {
-                    coroutineScope.launch {
-                        mealPlanService?.create(
-                            MealPlan(
-                                title = title,
-                                createdAt = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-                                goal = Macros(
-                                    calorie = calories,
-                                    carb = carbohydratesPercentage.toFloat(),
-                                    protein = proteinsPercentage.toFloat(),
-                                    fat = lipidsPercentage.toFloat()
-                                )
-                            )
-                        )
-                        onContinue()
-                    }
+                    viewModel.createMealPlan(request)
                 },
-                enabled = isFormValid,
+                enabled = isFormValid && !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             )
         }

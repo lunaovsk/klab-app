@@ -1,257 +1,152 @@
 package com.klab.app.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.paging.PagingData
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.klab.app.domain.model.food.Food
 import com.klab.app.service.usecase.FoodService
-import com.klab.app.ui.components.MainButton
-import com.klab.app.ui.components.SectionTitle
-import com.klab.app.ui.components.SubText
-import com.klab.app.ui.theme.BackgroundColor
-import com.klab.app.ui.theme.BorderLines
-import com.klab.app.ui.theme.MainTexts
-import com.klab.app.ui.theme.Outlines
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import com.klab.app.ui.components.FoodSearchField
+import com.klab.app.ui.components.cards.FoodResultItem
+import com.klab.app.ui.theme.*
+import com.klab.app.ui.viewModel.food.FoodSearchViewModel
+import org.koin.compose.koinInject
 
 @Composable
-@Preview
-fun SearchFoodScreen(
-    foodService: FoodService? = null,
-    onCreatePlan: () -> Unit = {}
+fun FoodSearchScreen(
+    onBack: () -> Unit,
+    onFoodsSelected: (List<Food>) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    var nameQuery by remember { mutableStateOf("") }
-    var groupFilter by remember { mutableStateOf("") }
-    var nutrientFilter by remember { mutableStateOf("") }
+    val foodService: FoodService = koinInject()
 
-    val foodsFlow: Flow<PagingData<Food>> = remember(nameQuery, groupFilter, foodService) {
-        when {
-            foodService == null -> flowOf(PagingData.empty())
-            nameQuery.trim().isNotBlank() -> foodService.search(nameQuery)
-            groupFilter.trim().isNotBlank() -> foodService.getByGroup(groupFilter)
-            else -> flowOf(PagingData.empty())
-        }
-    }
-
-    val lazyFoodItems = foodsFlow.collectAsLazyPagingItems()
-
-    val textFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = MainTexts,
-        unfocusedBorderColor = MainTexts.copy(alpha = 0.35f),
-        focusedTextColor = MainTexts,
-        unfocusedTextColor = MainTexts
+    val viewModel: FoodSearchViewModel = viewModel(
+        factory = FoodSearchViewModel.factory(foodService)
     )
 
-    MaterialTheme {
+    val query by viewModel.query.collectAsState()
+    val foods = viewModel.foods.collectAsLazyPagingItems()
+
+    val selectedFoods = remember {
+        mutableStateListOf<Food>()
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(BackgroundColor)
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(BackgroundColor)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            TextButton(
+                onClick = onBack,
+                contentPadding = PaddingValues(0.dp)
             ) {
-                SectionTitle(
-                    text = "Alimentos",
-                    fontSize = 24.sp
-                )
-
-                MainButton(
-                    text = "+ Criar Planejamento",
-                    onClick = onCreatePlan
+                Text(
+                    text = "← Voltar",
+                    color = GreenDetails
                 )
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedTextField(
-                    value = nameQuery,
-                    onValueChange = { nameQuery = it },
-                    modifier = Modifier.weight(1f),
-                    label = { Text("Nome") },
-                    placeholder = { Text("Buscar por nome...") },
-                    singleLine = true,
-                    colors = textFieldColors
-                )
+            Text(
+                text = "Pesquisar alimentos",
+                color = MainTexts,
+                style = MaterialTheme.typography.headlineSmall
+            )
 
-                OutlinedTextField(
-                    value = groupFilter,
-                    onValueChange = { groupFilter = it },
-                    modifier = Modifier.weight(1f),
-                    label = { Text("Grupo") },
-                    placeholder = { Text("Filtrar por grupo...") },
-                    singleLine = true,
-                    colors = textFieldColors
-                )
+            Text(
+                text = "Encontre os alimentos para montar sua refeição.",
+                color = SecondaryTexts,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
-                OutlinedTextField(
-                    value = nutrientFilter,
-                    onValueChange = { nutrientFilter = it },
-                    modifier = Modifier.weight(1f),
-                    label = { Text("Nutriente") },
-                    placeholder = { Text("Filtrar por nutriente...") },
-                    singleLine = true,
-                    colors = textFieldColors
-                )
-            }
+        FoodSearchField(
+            value = query,
+            onValueChange = viewModel::onSearchChange
+        )
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, BorderLines, RoundedCornerShape(12.dp))
-                    .background(Color.White)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Outlines)
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Alimento",
-                        modifier = Modifier.weight(2.5f),
-                        fontWeight = FontWeight.SemiBold,
-                        color = MainTexts,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Grupo",
-                        modifier = Modifier.weight(1.5f),
-                        fontWeight = FontWeight.SemiBold,
-                        color = MainTexts,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Kcal",
-                        modifier = Modifier.weight(1f),
-                        fontWeight = FontWeight.SemiBold,
-                        color = MainTexts,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Carb (g)",
-                        modifier = Modifier.weight(1f),
-                        fontWeight = FontWeight.SemiBold,
-                        color = MainTexts,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Prot (g)",
-                        modifier = Modifier.weight(1f),
-                        fontWeight = FontWeight.SemiBold,
-                        color = MainTexts,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Lip (g)",
-                        modifier = Modifier.weight(1f),
-                        fontWeight = FontWeight.SemiBold,
-                        color = MainTexts,
-                        fontSize = 14.sp
-                    )
+        Text(
+            text = "Resultados",
+            color = MainTexts,
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            items(
+                count = foods.itemCount,
+                key = { index ->
+                    foods[index]?.id ?: index
                 }
+            ) { index ->
 
-                HorizontalDivider(color = BorderLines)
+                val food = foods[index]
 
-                if (lazyFoodItems.itemCount == 0) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        SubText(text = "Nenhum alimento encontrado.")
+                if (food != null) {
+                    val isSelected = selectedFoods.any {
+                        it.id == food.id
                     }
-                } else {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(count = lazyFoodItems.itemCount) { index ->
-                            val food = lazyFoodItems[index]
-                            if (food != null) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = food.description,
-                                        modifier = Modifier.weight(2.5f),
-                                        color = MainTexts,
-                                        fontSize = 14.sp
-                                    )
-                                    SubText(
-                                        text = food.group,
-                                        modifier = Modifier.weight(1.5f),
-                                        fontSize = 13.sp
-                                    )
-                                    Text(
-                                        text = "${food.amountPer100g.calorie}",
-                                        modifier = Modifier.weight(1f),
-                                        color = MainTexts,
-                                        fontSize = 14.sp
-                                    )
-                                    Text(
-                                        text = "${food.amountPer100g.carb}",
-                                        modifier = Modifier.weight(1f),
-                                        color = MainTexts,
-                                        fontSize = 14.sp
-                                    )
-                                    Text(
-                                        text = "${food.amountPer100g.protein}",
-                                        modifier = Modifier.weight(1f),
-                                        color = MainTexts,
-                                        fontSize = 14.sp
-                                    )
-                                    Text(
-                                        text = "${food.amountPer100g.fat}",
-                                        modifier = Modifier.weight(1f),
-                                        color = MainTexts,
-                                        fontSize = 14.sp
-                                    )
+
+                    FoodResultItem(
+                        food = food,
+                        isSelected = isSelected,
+                        onSelect = {
+                            if (isSelected) {
+                                selectedFoods.removeAll {
+                                    it.id == food.id
                                 }
-                                HorizontalDivider(color = BorderLines)
+                            } else {
+                                selectedFoods.add(food)
                             }
                         }
+                    )
+                }
+            }
+
+            if (foods.loadState.append is androidx.paging.LoadState.Loading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = androidx.compose.ui.Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = GreenDetails
+                        )
                     }
                 }
             }
+        }
+
+        Button(
+            onClick = {
+                onFoodsSelected(selectedFoods.toList())
+            },
+            enabled = selectedFoods.isNotEmpty(),
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = GreenDetails
+            )
+        ) {
+            Text(
+                text = "Adicionar ${selectedFoods.size} alimentos"
+            )
         }
     }
 }

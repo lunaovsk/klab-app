@@ -1,0 +1,55 @@
+package com.klab.app.ui.viewModel.meal
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.klab.app.domain.dto.MacrosDTO
+import com.klab.app.domain.dto.meal.MealPlanRequest
+import com.klab.app.service.usecase.MealPlanService
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+class MealPlanViewModel( private val mealPlanService: MealPlanService): ViewModel() {
+
+    private val changeUiState = MutableStateFlow(MealPlanState())
+    val uiState: StateFlow<MealPlanState> = changeUiState.asStateFlow()
+
+    fun previewMacros(request: MealPlanRequest): MacrosDTO {
+        return mealPlanService.previewMacros(request)
+    }
+
+    fun createMealPlan(request: MealPlanRequest) {
+        if (changeUiState.value.isLoading) return
+        viewModelScope.launch {
+            changeUiState.value = MealPlanState(isLoading = true)
+
+            try {
+                val plan = mealPlanService.create(request)
+
+                changeUiState.value = MealPlanState(createdPlan = plan)
+
+            } catch (exception: Exception) {
+                changeUiState.value = MealPlanState(
+                    error = exception.message ?: "Erro ao criar planejamento."
+                )
+            }
+        }
+    }
+    fun consumeCreatedPlan() {
+        changeUiState.value = changeUiState.value.copy(createdPlan = null)
+    }
+    companion object {
+        fun factory(mealPlanService: MealPlanService): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    MealPlanViewModel(
+                        mealPlanService = mealPlanService
+                    )
+                }
+            }
+    }
+}

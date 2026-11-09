@@ -18,12 +18,7 @@ fun App() {
         KoinApplication(application = {
             modules(appModule(builder))
         }) {
-            val foodService: FoodService = koinInject()
-            val mealPlanService: MealPlanService = koinInject()
-            AppNavigation(
-                foodService = foodService,
-                mealPlanService = mealPlanService
-            )
+            AppNavigation()
         }
     } else {
         AppNavigation()

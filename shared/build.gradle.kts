@@ -108,6 +108,12 @@ kotlin {
     }
 }
 
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "klab.shared.generated.resources"
+    generateResClass = always
+}
+
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
 
