@@ -41,7 +41,7 @@ fun appModule(databaseBuilder: RoomDatabase.Builder<KlabDatabase>) = module {
     single { MealDistributionValidate(get()) }
 
     single { FoodService(get(), get()) }
-    single { MealPlanService(get(), percentageValidator= get()) }
+    single { MealPlanService(get(), get()) }
     single { MealService(mealRepository = get(), mealPlanRepository = get(), distributionValidator = get()) }
 
 

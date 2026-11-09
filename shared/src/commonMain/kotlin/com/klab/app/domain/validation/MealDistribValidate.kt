@@ -8,15 +8,8 @@ class MealDistributionValidate(
 ) : MealPlanValidate<List<MealDistribRequest>> {
 
     override fun validate(requests: List<MealDistribRequest>) {
-
-        if (requests.isEmpty()) {
-            throw IllegalArgumentException("Add at least one meal.")
-        }
-
-        if (requests.any { it.name.isBlank() }) {
-            throw IllegalArgumentException("Define all meals.")
-        }
-
+        require(requests.isNotEmpty()) { "Adicione pelo menos uma refeição." }
+        require(requests.none { it.name.isBlank() }) { "Defina o nome de todas as refeições." }
         percentageValidator.validate(requests.map { it.percentage })
     }
 }

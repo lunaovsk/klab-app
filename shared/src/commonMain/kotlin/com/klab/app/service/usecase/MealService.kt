@@ -1,12 +1,15 @@
 package com.klab.app.service.usecase
 
+import com.klab.app.domain.dto.MacrosDTO
 import com.klab.app.domain.dto.meal.MealDistribRequest
-import com.klab.app.domain.dto.meal.MealPlanRequest
-import com.klab.app.domain.model.food.Macros
+import com.klab.app.domain.dto.meal.MealResponse
 import com.klab.app.domain.model.meal.Meal
 import com.klab.app.domain.repository.MealPlanRepository
 import com.klab.app.domain.repository.MealRepository
 import com.klab.app.domain.validation.MealDistributionValidate
+import com.klab.app.infra.mapper.toDTO
+import com.klab.app.infra.mapper.toDomain
+import com.klab.app.infra.mapper.toResponse
 
 class MealService(
     private val mealRepository: MealRepository,
@@ -14,30 +17,26 @@ class MealService(
     private val distributionValidator: MealDistributionValidate
 ) {
 
-    suspend fun createMeals(planId: Long, requests: List<MealDistribRequest>): List<Long> {
-
+    suspend fun createMeals(planId: Long, requests: List<MealDistribRequest>): List<MealResponse> {
         distributionValidator.validate(requests)
 
-        val plan = mealPlanRepository.findById(planId) ?: throw NoSuchElementException("Planejamento nao encontrado: $planId")
+        val plan = mealPlanRepository.findById(planId)
+            ?: throw NoSuchElementException("Planejamento não encontrado: $planId")
 
         return requests.map { request ->
-
-            val meal = Meal(
-                name = request.name,
-                type = request.type,
-                displayOrder = request.displayOrder,
-                goal = plan.goal.calculateForPortion(amount = request.percentage.toFloat()),
-            )
-
-            mealRepository.add(meal, planId)
+            val savedMeal = mealRepository.add(request.toDomain(plan.goal), planId)
+            savedMeal.toResponse()
         }
     }
-    suspend fun previewMacros (planId: Long, request: MealDistribRequest): Macros{
-        val plan = mealPlanRepository.findById(planId) ?: throw NoSuchElementException("Planejamento nao encontrado: $planId")
 
-        return plan.goal.calculateForPortion(amount = request.percentage.toFloat())
+    suspend fun previewMacros(planId: Long, request: MealDistribRequest): MacrosDTO {
+        val plan = mealPlanRepository.findById(planId)
+            ?: throw NoSuchElementException("Planejamento não encontrado: $planId")
+
+        return plan.goal.calculateForPortion(amount = request.percentage.toFloat()).toDTO()
     }
-    suspend fun getMealsByPlanId(planId: Long): List<Meal> {
-        return mealRepository.findByPlanId(planId)
+
+    suspend fun getMealsByPlanId(planId: Long): List<MealResponse> {
+        return mealRepository.findByPlanId(planId).map(Meal::toResponse)
     }
 }
