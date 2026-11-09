@@ -31,10 +31,10 @@ fun PlanningOverviewScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(planId) { viewModel.loadMeals(planId) }
-
-    val totalOptions = uiState.meals.sumOf { meal -> meal.options.size }
-    val totalCalories = uiState.meals.sumOf { meal -> meal.goal.calorie.toDouble() }
     val meals = uiState.meals
+    val totalOptions = meals.sumOf { meal -> meal.options.size }
+    val totalCalories = meals.sumOf { meal -> meal.goal.calorie.toDouble() }
+
 
     MaterialTheme {
         Column(
