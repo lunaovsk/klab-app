@@ -4,7 +4,7 @@ import com.klab.app.domain.model.meal.Meal
 
 interface MealRepository {
 
-    suspend fun add(meal: Meal, planId: Long): Long
+    suspend fun add(meal: Meal, planId: Long): Meal
     suspend fun findById(id: Long): Meal?
     suspend fun findByPlanId(planId: Long): List<Meal>
     suspend fun findMealWithOptions(id: Long): Meal?
