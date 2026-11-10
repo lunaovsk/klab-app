@@ -1,7 +1,7 @@
 package com.klab.app.di
 
 import androidx.room.RoomDatabase
-import com.klab.app.domain.dto.meal.MealPlanRequest
+
 import com.klab.app.domain.repository.FoodRepository
 import com.klab.app.domain.repository.MealPlanRepository
 import com.klab.app.domain.repository.MealRepository
@@ -9,7 +9,6 @@ import com.klab.app.domain.validation.DailyGoalsPlan
 import com.klab.app.domain.validation.FoodEmptyTrim
 import com.klab.app.domain.validation.FoodValidate
 import com.klab.app.domain.validation.MealDistributionValidate
-import com.klab.app.domain.validation.MealPlanValidate
 import com.klab.app.domain.validation.PercentageValidate
 import com.klab.app.infra.database.KlabDatabase
 import com.klab.app.infra.database.getRoomDatabase
@@ -28,6 +27,7 @@ fun appModule(databaseBuilder: RoomDatabase.Builder<KlabDatabase>) = module {
 
     single { get<KlabDatabase>().foodDao() }
     single { get<KlabDatabase>().mealPlanDao() }
+
     single { get<KlabDatabase>().mealDao() }
 
 
@@ -43,6 +43,5 @@ fun appModule(databaseBuilder: RoomDatabase.Builder<KlabDatabase>) = module {
     single { FoodService(get(), get()) }
     single { MealPlanService(get(), get()) }
     single { MealService(mealRepository = get(), mealPlanRepository = get(), distributionValidator = get()) }
-
 
 }
