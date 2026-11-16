@@ -10,5 +10,5 @@ interface FoodRepository {
     suspend fun listAllGroups(): List<String>
     fun searchByDescription(query: String): Flow<PagingData<Food>>
     fun findByGroup(group: String): Flow<PagingData<Food>>
-
+    fun searchDescriptionByGroup(query: String, group: String): Flow<PagingData<Food>>
 }

@@ -9,34 +9,38 @@ import com.klab.app.domain.model.food.Food
 import com.klab.app.ui.theme.*
 import kotlin.math.round
 
+
 @Composable
 fun FoodQuantityDialog(
     food: Food,
     initialGrams: Float = 100f,
+    isEditing: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: (Float) -> Unit
 ) {
-    var grams by remember(food.id) {
+    var grams by remember(food.id, initialGrams) {
         mutableStateOf(initialGrams.toString())
     }
 
-    val quantity = grams.toFloatOrNull()
-        ?.takeIf { it > 0 }
+    val quantity = grams.replace(',', '.')
+        .toFloatOrNull()
+        ?.takeIf { it.isFinite() && it > 0f }
 
     val macros = quantity?.let {
-        val factor = it / 100f
-
-        listOf(
-            "Calorias" to food.amountPer100g.calorie * factor,
-            "Carboidratos" to food.amountPer100g.carb * factor,
-            "Proteínas" to food.amountPer100g.protein * factor,
-            "Lipídios" to food.amountPer100g.fat * factor
-        )
+        food.amountPer100g.calculateForPortion(it)
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Quantidade do alimento") },
+        title = {
+            Text(
+                if (isEditing) {
+                    "Editar quantidade"
+                } else {
+                    "Quantidade do alimento"
+                }
+            )
+        },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -50,7 +54,7 @@ fun FoodQuantityDialog(
                 OutlinedTextField(
                     value = grams,
                     onValueChange = { value ->
-                        if (value.matches(Regex("^\\d*\\.?\\d*$"))) {
+                        if (value.matches(Regex("""^\d*[.,]?\d*$"""))) {
                             grams = value
                         }
                     },
@@ -69,7 +73,12 @@ fun FoodQuantityDialog(
                 )
 
                 if (macros != null) {
-                    macros.forEach { (name, value) ->
+                    listOf(
+                        "Calorias" to macros.calorie,
+                        "Carboidratos" to macros.carb,
+                        "Proteínas" to macros.protein,
+                        "Lipídios" to macros.fat
+                    ).forEach { (name, value) ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -94,10 +103,13 @@ fun FoodQuantityDialog(
                 onClick = { quantity?.let(onConfirm) },
                 enabled = quantity != null
             ) {
-                Text("Adicionar")
+                Text(if (isEditing) "Salvar" else "Adicionar")
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") }
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
         },
         containerColor = BackgroundColor
     )

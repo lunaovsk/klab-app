@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.klab.app.domain.model.food.Food
@@ -17,6 +18,7 @@ fun FoodResultItem(
     food: Food,
     isSelected: Boolean,
     onSelect: () -> Unit,
+    showSelectionAction: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -76,15 +78,23 @@ fun FoodResultItem(
             )
         }
 
-        TextButton(
-            onClick = onSelect,
-            modifier = Modifier.align(androidx.compose.ui.Alignment.End)
-        ) {
-            Text(
-                text = if (isSelected) "Adicionado ✓" else "+ Adicionar",
-                color = GreenDetails
-            )
+
+        if (showSelectionAction) {
+            TextButton(
+                onClick = onSelect,
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(
+                    text = if (isSelected) {
+                        "Selecionado"
+                    } else {
+                        "+ Adicionar"
+                    },
+                    color = GreenDetails
+                )
+            }
         }
+
     }
 }
 
