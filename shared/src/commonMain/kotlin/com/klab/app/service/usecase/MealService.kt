@@ -37,6 +37,12 @@ class MealService(
     }
 
     suspend fun getMealsByPlanId(planId: Long): List<MealResponse> {
-        return mealRepository.findByPlanId(planId).map(Meal::toResponse)
+        val meals = mealRepository.findByPlanId(planId)
+
+        return meals.map { meal ->
+            mealRepository.findMealWithOptions(meal.id)
+                ?.toResponse()
+                ?: throw NoSuchElementException("Refeição não encontrada.")
+        }
     }
 }

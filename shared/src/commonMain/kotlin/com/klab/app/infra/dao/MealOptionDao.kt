@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.klab.app.infra.local.MealItemEntity
 import com.klab.app.infra.local.MealOptionEntity
 import com.klab.app.infra.local.relations.OptionsWithItem
 
@@ -15,6 +16,25 @@ interface MealOptionDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(mealOptionEntity: MealOptionEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertItems(items: List<MealItemEntity>)
+
+    @Transaction
+    suspend fun insertAll(options: List<MealOptionEntity>, itemsByOption: List<List<MealItemEntity>>): List<Long> {
+
+        return options.mapIndexed { index, option ->
+
+            val optionId = insert(option)
+            val items = itemsByOption[index].map { item ->
+                MealItemEntity(mealId = item.mealId, optionId = optionId,
+                    foodId = item.foodId, amountInGrams = item.amountInGrams
+                )
+            }
+            insertItems(items)
+            optionId
+        }
+    }
 
     @Query("SELECT * FROM tb_meal_option WHERE option_id = :id")
     suspend fun findById(id: Long): MealOptionEntity?
