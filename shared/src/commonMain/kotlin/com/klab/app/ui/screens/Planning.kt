@@ -4,10 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -18,23 +19,49 @@ import com.klab.app.ui.theme.*
 import com.klab.app.ui.viewModel.meal.PlanningViewModel
 import org.koin.compose.koinInject
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.klab.app.service.usecase.MealPlanService
+import com.klab.app.service.usecase.PlanningPdfService
+import com.klab.app.ui.components.MainButton
 
 @Composable
 fun PlanningOverviewScreen(
     planId: Long,
     onMealClick: (Long) -> Unit = {},
+    onConcludePlan: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
 
     val mealService: MealService = koinInject()
-    val viewModel: PlanningViewModel = viewModel(factory = PlanningViewModel.factory(mealService))
+    val mealPlanService: MealPlanService = koinInject()
+    val pdfService: PlanningPdfService = koinInject()
+
+    val viewModel: PlanningViewModel = viewModel(factory = PlanningViewModel.factory(mealPlanService,mealService))
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(planId) { viewModel.loadMeals(planId) }
     val meals = uiState.meals
     val totalOptions = meals.sumOf { meal -> meal.options.size }
-    val totalCalories = meals.sumOf { meal -> meal.goal.calorie.toDouble() }
+    val planName = uiState.planName
+    val dailyCalories = uiState.dailyCalories
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, planId) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.loadPlan(planId)
+                viewModel.loadMeals(planId)
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     MaterialTheme {
         Column(
@@ -47,7 +74,7 @@ fun PlanningOverviewScreen(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
-                    text = "Meu planejamento",
+                    text = "$planName",
                     color = MainTexts,
                     style = MaterialTheme.typography.headlineSmall
                 )
@@ -76,7 +103,7 @@ fun PlanningOverviewScreen(
                 )
 
                 Text(
-                    text = "$totalCalories",
+                    text = "$dailyCalories",
                     color = GreenDetails,
                     style = MaterialTheme.typography.headlineMedium
                 )
@@ -102,6 +129,13 @@ fun PlanningOverviewScreen(
                         onClick = { onMealClick(meal.id) }
                     )
                 }
+
+                MainButton(
+                    text = "Concluir",
+                    onClick = onConcludePlan,
+                    enabled = meals.isNotEmpty() && meals.all { it.options.isNotEmpty() },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

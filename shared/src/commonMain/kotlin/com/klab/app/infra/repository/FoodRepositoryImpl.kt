@@ -44,4 +44,15 @@ class FoodRepositoryImpl(
         }
     }
 
+
+    override fun searchDescriptionByGroup(query: String, group: String): Flow<PagingData<Food>> {
+
+        return Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = false),
+            pagingSourceFactory = { foodDao.searchDescriptionByGroup(query = query, group = group) }
+        ).flow.map { pagingData ->
+            pagingData.map ( FoodEntity::toDomain)
+        }
+    }
+
 }

@@ -17,6 +17,15 @@ class MealOptionRepositoryImpl(
         return mealOptionDao.insert(mealOption.toEntity(mealId))
     }
 
+    override suspend fun insertAll(mealId: Long, options: List<MealOption>): List<Long> {
+        return mealOptionDao.insertAll(
+            options = options.map { it.toEntity(mealId) },
+            itemsByOption = options.map { option ->
+                option.items.map { it.toEntity(optionId = 0L) }
+            }
+        )
+    }
+
     override suspend fun findById(id: Long): MealOption? {
         return mealOptionDao.findById(id)?.toDomain()
     }

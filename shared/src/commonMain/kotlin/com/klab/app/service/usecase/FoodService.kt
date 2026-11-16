@@ -30,4 +30,9 @@ class FoodService(
         return foodRepository.listAllGroups()
     }
 
+
+    fun searchDescriptionByGroup(query: String, group: String): Flow<PagingData<Food>> {
+        return foodRepository.searchDescriptionByGroup(query = query, group = group)
+    }
+
 }

@@ -38,4 +38,8 @@ interface FoodDao {
         protein: Float,
         fat: Float
     )
+
+    @Query("SELECT * FROM tb_tbca WHERE `group` = :group AND description LIKE '%' || :query || '%' ORDER BY description ASC")
+    fun searchDescriptionByGroup(query: String, group: String): PagingSource<Int, FoodEntity>
+
 }

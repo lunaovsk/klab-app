@@ -3,21 +3,30 @@ package com.klab.app.di
 import androidx.room.RoomDatabase
 
 import com.klab.app.domain.repository.FoodRepository
+import com.klab.app.domain.repository.MealItemRepository
+import com.klab.app.domain.repository.MealOptionRepository
 import com.klab.app.domain.repository.MealPlanRepository
 import com.klab.app.domain.repository.MealRepository
 import com.klab.app.domain.validation.DailyGoalsPlan
 import com.klab.app.domain.validation.FoodEmptyTrim
 import com.klab.app.domain.validation.FoodValidate
 import com.klab.app.domain.validation.MealDistributionValidate
+import com.klab.app.domain.validation.MealEditorValidate
+import com.klab.app.domain.validation.MealGoalValidate
 import com.klab.app.domain.validation.PercentageValidate
 import com.klab.app.infra.database.KlabDatabase
 import com.klab.app.infra.database.getRoomDatabase
+import com.klab.app.infra.pdf.PlanningPdfBuilder
 import com.klab.app.infra.repository.FoodRepositoryImpl
+import com.klab.app.infra.repository.MealItemRepositoryImpl
+import com.klab.app.infra.repository.MealOptionRepositoryImpl
 import com.klab.app.infra.repository.MealPlanRepositoryImpl
 import com.klab.app.infra.repository.MealRepositoryImpl
 import com.klab.app.service.usecase.FoodService
+import com.klab.app.service.usecase.MealOptionService
 import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.service.usecase.MealService
+import com.klab.app.service.usecase.PlanningPdfService
 import org.koin.dsl.module
 
 var appDatabaseBuilder: RoomDatabase.Builder<KlabDatabase>? = null
@@ -29,8 +38,11 @@ fun appModule(databaseBuilder: RoomDatabase.Builder<KlabDatabase>) = module {
     single { get<KlabDatabase>().mealPlanDao() }
 
     single { get<KlabDatabase>().mealDao() }
+    single { get<KlabDatabase>().mealOptionDao() }
+    single { get<KlabDatabase>().mealItemDao() }
 
-
+    single<MealOptionRepository> { MealOptionRepositoryImpl(get()) }
+    single<MealItemRepository> { MealItemRepositoryImpl(get()) }
     single<FoodRepository> { FoodRepositoryImpl(get()) }
     single<MealPlanRepository> { MealPlanRepositoryImpl(get()) }
     single<MealRepository> { MealRepositoryImpl(get()) }
@@ -39,9 +51,16 @@ fun appModule(databaseBuilder: RoomDatabase.Builder<KlabDatabase>) = module {
     single { PercentageValidate() }
     single { DailyGoalsPlan(get()) }
     single { MealDistributionValidate(get()) }
+    single { MealGoalValidate() }
+    single { MealEditorValidate() }
+    single { PlanningPdfBuilder() }
 
     single { FoodService(get(), get()) }
     single { MealPlanService(get(), get()) }
-    single { MealService(mealRepository = get(), mealPlanRepository = get(), distributionValidator = get()) }
+    single { MealService(get(), get(), get()) }
+    single { MealOptionService( get(), get(), get(),
+         get(), get(), get())
+    }
+    single { PlanningPdfService( get(), get(), get(), get()) }
 
 }
