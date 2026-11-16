@@ -80,7 +80,8 @@ kotlin {
             implementation(libs.androidx.paging.compose)
             implementation(libs.kotlinx.datetime)
             implementation(libs.navigation.compose)
-            
+            implementation(libs.conamobiledev.pdfkmp)
+            implementation(libs.conamobiledev.pdfkmp.viewer)
             // Injeção de Dependência
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
