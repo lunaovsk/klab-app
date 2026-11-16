@@ -9,21 +9,21 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.savedstate.read
-import com.klab.app.service.usecase.FoodService
-import com.klab.app.service.usecase.MealPlanService
+import com.klab.app.service.usecase.MealOptionService
 import com.klab.app.ui.screens.*
+import com.klab.app.ui.screens.enums.SearchModeFood
+import com.klab.app.ui.viewModel.meal.MealEditorViewModel
+import org.koin.compose.koinInject
 
 @Composable
-fun AppNavigation(
-    foodService: FoodService? = null,
-    mealPlanService: MealPlanService? = null
-) {
+fun AppNavigation() {
     val navController = rememberNavController()
 
     Box(
@@ -49,7 +49,7 @@ fun AppNavigation(
             composable(AppRoutes.DAILY_GOALS) {
                 DailyGoalsScreen(
                     onContinue = { planId ->
-                        navController.navigate("meal_distribution/$planId")
+                        navController.navigate(AppRoutes.mealDistribution(planId))
                     }
                 )
             }
@@ -60,14 +60,13 @@ fun AppNavigation(
                     }
                     )
             ) {backStackEntry ->
-
                 val planId = backStackEntry.arguments
                     ?.read { getLongOrNull("planId") }
                     ?: return@composable
 
                 MealDistributionScreen(
                     planId = planId,
-                    onContinue = { navController.navigate("planning/$planId")}
+                    onContinue = { navController.navigate(AppRoutes.planningOverview(planId))}
                 )
             }
             composable(AppRoutes.PLANNING_OVERVIEW,arguments = listOf(
@@ -79,23 +78,119 @@ fun AppNavigation(
                     ?: return@composable
                 PlanningOverviewScreen(
                     planId = planId,
-                    onMealClick = {}
+                    onMealClick = { mealId ->
+                        navController.navigate(AppRoutes.mealEditor(mealId))
+                    },
+                    onConcludePlan = {
+                        navController.navigate(AppRoutes.pdfPreview(planId)) }
+                )
+            }
+
+            composable(route = AppRoutes.MEAL_EDITOR,
+                arguments = listOf(
+                    navArgument("mealId") { type = NavType.LongType }
+                )
+            ) { backStackEntry ->
+
+                val mealId = backStackEntry.arguments
+                    ?.read { getLongOrNull("mealId") }
+                    ?: return@composable
+
+
+                MealEditorScreen(
+                    mealId = mealId,
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onSearchFoods = { draftId ->
+                        navController.navigate(
+                            AppRoutes.searchFoodOption(mealId, draftId)
+                        )
+                    }
+                )
+
+            }
+
+            composable(
+                route = AppRoutes.SEARCH_FOOD_OPTION,
+                arguments = listOf(
+                    navArgument("mealId") {
+                        type = NavType.LongType
+                    },
+                    navArgument("optionId") {
+                        type = NavType.LongType
+                    }
+                )
+            ) { backStackEntry ->
+
+                val mealId = backStackEntry.arguments
+                    ?.read { getLongOrNull("mealId") }
+                    ?: return@composable
+
+                val draftId = backStackEntry.arguments
+                    ?.read { getLongOrNull("optionId") }
+                    ?: return@composable
+
+                val editorEntry = navController.previousBackStackEntry
+                    ?: return@composable
+
+                val editorService: MealOptionService = koinInject()
+
+                val editorViewModel: MealEditorViewModel = viewModel(
+                    viewModelStoreOwner = editorEntry,
+                    factory = MealEditorViewModel.factory(editorService)
+                )
+
+                FoodSearchScreen(
+                    mode = SearchModeFood.SELECT_FOR_MEAL,
+
+                    onBack = { navController.popBackStack() },
+
+                    onFoodsSelected = { selectedFoods ->
+                        editorViewModel.addFoodsToDraft(
+                            mealId = mealId,
+                            draftId = draftId,
+                            foods = selectedFoods
+                        )
+
+                        navController.popBackStack()
+                    }
                 )
             }
 
             composable(AppRoutes.SEARCH_FOOD) {
                 FoodSearchScreen(
+                    mode = SearchModeFood.SEARCH_ONLY,
                     onBack = {
                         navController.popBackStack()
-                    },
-                    onFoodsSelected = { foods ->
-                        navController.previousBackStackEntry
-                            ?.savedStateHandle
-                            ?.set("selected_food_ids", foods.map { it.food.id})
-
-                        navController.popBackStack()
                     }
+                )
+            }
 
+            composable(
+                route = AppRoutes.PDF_PREVIEW,
+                arguments = listOf(
+                    navArgument("planId") {
+                        type = NavType.LongType
+                    }
+                )
+            ) { backStackEntry ->
+
+                val planId = backStackEntry.arguments
+                    ?.read { getLongOrNull("planId") }
+                    ?: return@composable
+
+                PdfPreviewScreen(
+                    planId = planId,
+                    onBack = {
+                        navController.navigate(AppRoutes.HOME) {
+                            popUpTo(AppRoutes.HOME) {
+                                inclusive = false
+                            }
+
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
