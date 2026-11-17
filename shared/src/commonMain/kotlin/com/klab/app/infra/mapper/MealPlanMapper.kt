@@ -49,12 +49,7 @@ fun MealPlanRequest.toDomain(): MealPlan {
     return MealPlan(
         title = this.title.trim(),
         createdAt = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-        goal = Macros.fromCalories(
-            calories = this.calories,
-            carbPercentage = this.carbosPerc,
-            proteinPercentage = this.proteinPerc,
-            fatPercentage = this.fatPerc
-        )
+        goal = this.toMacros()
     )
 }
 

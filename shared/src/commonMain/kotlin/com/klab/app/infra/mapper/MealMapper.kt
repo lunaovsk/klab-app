@@ -43,12 +43,12 @@ fun MealsWithOptions.toDomain(): Meal {
     )
 }
 
-fun MealDistribRequest.toDomain(planGoal: Macros): Meal {
+fun MealDistribRequest.toDomain(mealGoal: Macros): Meal {
     return Meal(
         name = this.name.trim(),
         type = this.type,
         displayOrder = this.displayOrder,
-        goal = planGoal.calculateForPortion(this.percentage.toFloat())
+        goal = mealGoal
     )
 }
 
