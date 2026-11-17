@@ -14,8 +14,9 @@ class Meal (
 
 ) {
     init {
+        require(name.isNotBlank()) { throw(IllegalArgumentException("Meal name must be non-blank")) }
         require(displayOrder > 0) { throw(IllegalArgumentException("Meal order must be positive")) }
-        require(goal.calorie >= 0) { throw(IllegalArgumentException("Meal order must be positive")) }
+        require(goal.calorie >= 0) { throw(IllegalArgumentException("Meal goal must be positive")) }
     }
 
     fun addOption(name: String, type: MealType): Meal {
