@@ -1,6 +1,8 @@
 package com.klab.app.infra.mapper
 
+import com.klab.app.domain.dto.meal.MealItemRequest
 import com.klab.app.domain.dto.meal.MealItemResponse
+import com.klab.app.domain.dto.meal.MealItemUpdateRequest
 import com.klab.app.domain.model.meal.GramsAmount
 import com.klab.app.domain.model.meal.MealItem
 import com.klab.app.infra.local.MealItemEntity
@@ -25,6 +27,17 @@ fun MealItem.toEntity(optionId: Long): MealItemEntity {
 
 fun ItemWithFood.toDomain(): MealItem {
     return this.mealItemEntity.toDomain()
+}
+
+fun MealItemRequest.toDomain(): MealItem {
+    return MealItem(
+        amountInGrams = GramsAmount(this.amountInGrams),
+        foodId = this.foodId
+    )
+}
+
+fun MealItemUpdateRequest.toGramsAmount(): GramsAmount {
+    return GramsAmount(this.amountInGrams)
 }
 
 fun MealItem.toResponse(): MealItemResponse {
