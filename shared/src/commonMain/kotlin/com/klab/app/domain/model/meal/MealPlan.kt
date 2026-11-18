@@ -47,11 +47,7 @@ class MealPlan(
         return consumed.calorie in minGoal..maxGoal
     }
 
-    fun update(
-        title: String? = null,
-        goal: Macros? = null,
-        meals: MutableSet<Meal>? = null
-    ): MealPlan {
+    fun update(title: String? = null, goal: Macros? = null, meals: MutableSet<Meal>? = null): MealPlan {
         return MealPlan(
             id = this.id,
             title = if (!title.isNullOrBlank()) title.trim() else this.title,

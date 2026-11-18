@@ -19,6 +19,15 @@ class Macros (
         )
     }
 
+    fun sumNutrients(other: Macros): Macros {
+        return Macros(
+            calorie = this.calorie + other.calorie,
+            carb = this.carb + other.carb,
+            protein = this.protein + other.protein,
+            fat = this.fat + other.fat
+        )
+    }
+
     fun isValid() {
         if (this.calorie < 0f || this.carb < 0f || this.protein < 0f || this.fat < 0f ) {
             throw(IllegalArgumentException("Values must be more than 0."))
