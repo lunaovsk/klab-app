@@ -13,8 +13,14 @@ class MealOptionRepositoryImpl(
 
 ) : MealOptionRepository {
 
-    override suspend fun insert(mealOption: MealOption, mealId: Long): Long {
-        return mealOptionDao.insert(mealOption.toEntity(mealId))
+    override suspend fun insert(mealOption: MealOption, mealId: Long): MealOption {
+        val generatedId = mealOptionDao.insert(mealOption.toEntity(mealId))
+        return MealOption(
+            id = generatedId,
+            title = mealOption.title,
+            displayOrder = mealOption.displayOrder,
+            items = mealOption.items
+        )
     }
 
     override suspend fun insertAll(mealId: Long, options: List<MealOption>): List<Long> {
