@@ -10,7 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.klab.app.service.usecase.MealItemService
 import com.klab.app.service.usecase.MealOptionService
+import com.klab.app.service.usecase.MealService
 import com.klab.app.ui.components.FoodQuantityDialog
 import com.klab.app.ui.components.MainButton
 import com.klab.app.ui.components.SectionTitle
@@ -28,10 +30,12 @@ fun MealEditorScreen(
     onSearchFoods: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val mealService: MealService = koinInject()
     val mealOptionService: MealOptionService = koinInject()
+    val mealItemService: MealItemService = koinInject()
 
     val viewModel: MealEditorViewModel = viewModel(
-        factory = MealEditorViewModel.factory(mealOptionService)
+        factory = MealEditorViewModel.factory(mealService, mealOptionService, mealItemService)
     )
 
     val uiState by viewModel.uiState.collectAsState()

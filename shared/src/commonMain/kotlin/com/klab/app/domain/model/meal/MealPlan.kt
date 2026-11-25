@@ -5,25 +5,31 @@ import kotlinx.datetime.LocalDate
 
 class MealPlan(
     val id: Long = 0L,
-    val title: String,
+    title: String,
     val createdAt: LocalDate,
-    val goal: Macros,
+    goal: Macros,
     val meals: MutableSet<Meal> = mutableSetOf(),
     isActive: Boolean = true
 ) {
+    var title: String = title
+        private set
+
+    var goal: Macros = goal
+        private set
+
     var isActive: Boolean = isActive
         private set
 
     init {
-        require(title.isNotBlank()) { throw(IllegalArgumentException("Title must be non-blank")) }
-        require(goal.calorie > 0) { throw(IllegalArgumentException("Goal must be positive")) }
+        require(title.isNotBlank()) { "Title must be non-blank" }
+        require(goal.calorie > 0) { "Goal must be positive" }
     }
 
     fun addMeal(meal: Meal): MealPlan {
         val currentTotalCalories = this.meals.sumOf { it.goal.calorie.toDouble() }.toFloat()
         val maxGoal = this.goal.calorie * 1.10f
         require(currentTotalCalories + meal.goal.calorie <= maxGoal) {
-            throw(IllegalArgumentException("The sum of the meal goals exceeds the plan's daily calorie target."))
+            "The sum of the meal goals exceeds the plan's daily calorie target."
         }
         this.meals.add(meal)
         return this
@@ -32,12 +38,12 @@ class MealPlan(
     fun removeMeal(mealId: Long): MealPlan {
         val removed = this.meals.removeAll { it.id == mealId }
         require(removed) {
-            throw(IllegalArgumentException("Meal not found with id: $mealId"))
+            "Meal not found with id: $mealId"
         }
         return this
     }
 
-    fun desactivate () {
+    fun desactivate() {
         this.isActive = false
     }
 
@@ -47,14 +53,13 @@ class MealPlan(
         return consumed.calorie in minGoal..maxGoal
     }
 
-    fun update(title: String? = null, goal: Macros? = null, meals: MutableSet<Meal>? = null): MealPlan {
-        return MealPlan(
-            id = this.id,
-            title = if (!title.isNullOrBlank()) title.trim() else this.title,
-            createdAt = this.createdAt,
-            goal = goal ?: this.goal,
-            meals = meals ?: this.meals,
-            isActive = this.isActive
-        )
+    fun update(newTitle: String? = null, newGoal: Macros? = null) {
+        if (!newTitle.isNullOrBlank()) {
+            this.title = newTitle.trim()
+        }
+        if (newGoal != null) {
+            require(newGoal.calorie > 0) { "Goal must be positive" }
+            this.goal = newGoal
+        }
     }
 }

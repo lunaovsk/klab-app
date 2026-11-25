@@ -1,8 +1,9 @@
 package com.klab.app.infra.mapper
 
-import com.klab.app.domain.dto.meal.MealItemRequest
-import com.klab.app.domain.dto.meal.MealItemResponse
-import com.klab.app.domain.dto.meal.MealItemUpdateRequest
+import com.klab.app.domain.dto.request.MealItemRequest
+import com.klab.app.domain.dto.response.MealItemResponse
+import com.klab.app.domain.dto.request.MealItemUpdateRequest
+import com.klab.app.domain.model.food.Food
 import com.klab.app.domain.model.meal.GramsAmount
 import com.klab.app.domain.model.meal.MealItem
 import com.klab.app.infra.local.MealItemEntity
@@ -26,13 +27,28 @@ fun MealItem.toEntity(optionId: Long): MealItemEntity {
 }
 
 fun ItemWithFood.toDomain(): MealItem {
-    return this.mealItemEntity.toDomain()
+    return MealItem(
+        id = this.mealItemEntity.mealId,
+        amountInGrams = GramsAmount(this.mealItemEntity.amountInGrams),
+        foodId = this.mealItemEntity.foodId,
+        food = this.foodEntity.toDomain()
+    )
 }
 
-fun MealItemRequest.toDomain(): MealItem {
+fun MealItemRequest.toDomain(food: Food? = null): MealItem {
     return MealItem(
         amountInGrams = GramsAmount(this.amountInGrams),
-        foodId = this.foodId
+        foodId = this.foodId,
+        food = food
+    )
+}
+
+fun MealItem.withGeneratedId(generatedId: Long): MealItem {
+    return MealItem(
+        id = generatedId,
+        amountInGrams = this.amountInGrams,
+        foodId = this.foodId,
+        food = this.food
     )
 }
 
@@ -44,6 +60,7 @@ fun MealItem.toResponse(): MealItemResponse {
     return MealItemResponse(
         id = this.id,
         amountInGrams = this.amountInGrams.amount,
-        foodId = this.foodId
+        foodId = this.foodId,
+        food = this.food
     )
 }

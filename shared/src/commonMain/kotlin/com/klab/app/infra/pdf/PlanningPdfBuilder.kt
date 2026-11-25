@@ -1,14 +1,13 @@
-
 package com.klab.app.infra.pdf
 
-import com.conamobile.pdfkmp.pdf
 import com.conamobile.pdfkmp.geometry.Padding
 import com.conamobile.pdfkmp.layout.PageBreakStrategy
+import com.conamobile.pdfkmp.pdf
 import com.conamobile.pdfkmp.style.BorderStroke
 import com.conamobile.pdfkmp.style.PdfColor
 import com.conamobile.pdfkmp.unit.dp
 import com.conamobile.pdfkmp.unit.sp
-import com.klab.app.domain.dto.meal.MealEditorData
+import com.klab.app.domain.dto.response.MealPlanResponse
 
 class PlanningPdfBuilder {
 
@@ -17,17 +16,11 @@ class PlanningPdfBuilder {
     private val darkText = PdfColor(0.18f, 0.23f, 0.20f)
     private val secondaryText = PdfColor(0.42f, 0.47f, 0.44f)
     private val borderColor = PdfColor(0.82f, 0.88f, 0.84f)
-    private val lightBackground = PdfColor(0.97f, 0.98f, 0.97f)
 
-    fun build(
-        planName: String,
-        dailyCalories: Float,
-        meals: List<MealEditorData>
-    ): ByteArray {
-
+    fun build(plan: MealPlanResponse): ByteArray {
         val document = pdf {
-
-            metadata { title = planName
+            metadata {
+                title = plan.title
                 author = "KLab"
             }
 
@@ -35,7 +28,6 @@ class PlanningPdfBuilder {
                 pageBreakStrategy = PageBreakStrategy.Slice
 
                 column(spacing = 16.dp) {
-
                     column(spacing = 6.dp) {
                         text("KLab") {
                             fontSize = 28.sp
@@ -53,7 +45,7 @@ class PlanningPdfBuilder {
                             color = borderColor
                         )
 
-                        text(planName) {
+                        text(plan.title) {
                             fontSize = 20.sp
                             bold = true
                             color = darkText
@@ -71,7 +63,7 @@ class PlanningPdfBuilder {
                                 color = secondaryText
                             }
 
-                            text("${dailyCalories.toInt()} kcal") {
+                            text("${plan.goal.calorie.toInt()} kcal") {
                                 fontSize = 24.sp
                                 bold = true
                                 color = primary
@@ -85,93 +77,81 @@ class PlanningPdfBuilder {
                         color = darkText
                     }
 
-                    meals.forEach { meal ->
+                    plan.meals
+                        .sortedBy { it.displayOrder }
+                        .forEach { meal ->
+                            card(
+                                background = PdfColor.White,
+                                cornerRadius = 10.dp,
+                                padding = Padding.all(16.dp),
+                                border = BorderStroke(
+                                    1.dp,
+                                    borderColor
+                                )
+                            ) {
+                                column(spacing = 12.dp) {
+                                    card(
+                                        background = lightGreen,
+                                        cornerRadius = 7.dp,
+                                        padding = Padding.all(12.dp)
+                                    ) {
+                                        column(spacing = 4.dp) {
+                                            text(meal.name) {
+                                                fontSize = 17.sp
+                                                bold = true
+                                                color = primary
+                                            }
 
-                        card(
-                            background = PdfColor.White,
-                            cornerRadius = 10.dp,
-                            padding = Padding.all(16.dp),
-                            border = BorderStroke(
-                                1.dp,
-                                borderColor
-                            )
-                        ) {
-
-                            column(spacing = 12.dp) {
-
-                                card(
-                                    background = lightGreen,
-                                    cornerRadius = 7.dp,
-                                    padding = Padding.all(12.dp)
-                                ) {
-                                    column(spacing = 4.dp) {
-                                        text(meal.meal.name) {
-                                            fontSize = 17.sp
-                                            bold = true
-                                            color = primary
+                                            text("Meta: ${meal.goal.calorie.toInt()} kcal") {
+                                                fontSize = 11.sp
+                                                color = secondaryText
+                                            }
                                         }
+                                    }
 
-                                        text(
-                                            "Meta: " +
-                                                    "${meal.meal.goal.calorie.toInt()} kcal"
-                                        ) {
+                                    if (meal.options.isEmpty()) {
+                                        text("Nenhuma opção cadastrada.") {
                                             fontSize = 11.sp
                                             color = secondaryText
                                         }
                                     }
-                                }
 
-                                if (meal.options.isEmpty()) {
-                                    text("Nenhuma opção cadastrada.") {
-                                        fontSize = 11.sp
-                                        color = secondaryText
-                                    }
-                                }
-
-                                meal.options
-                                    .sortedBy { it.displayOrder }
-                                    .forEachIndexed { index, option ->
-
-                                        if (index > 0) {
-                                            divider(
-                                                thickness = 0.5.dp,
-                                                color = borderColor
-                                            )
-                                        }
-
-                                        column(spacing = 8.dp) {
-
-                                            text(option.title) {
-                                                fontSize = 14.sp
-                                                bold = true
-                                                color = darkText
+                                    meal.options
+                                        .sortedBy { it.displayOrder }
+                                        .forEachIndexed { index, option ->
+                                            if (index > 0) {
+                                                divider(
+                                                    thickness = 0.5.dp,
+                                                    color = borderColor
+                                                )
                                             }
 
-                                            option.items.forEach { details ->
+                                            column(spacing = 8.dp) {
+                                                text(option.title) {
+                                                    fontSize = 14.sp
+                                                    bold = true
+                                                    color = darkText
+                                                }
 
-                                                column(spacing = 3.dp) {
+                                                option.items.forEach { item ->
+                                                    column(spacing = 3.dp) {
+                                                        text(item.food?.description ?: "Alimento #${item.foodId}") {
+                                                            fontSize = 11.sp
+                                                            color = darkText
+                                                        }
 
-                                                    text(
-                                                        details.food.description
-                                                    ) {
-                                                        fontSize = 11.sp
-                                                        color = darkText
-                                                    }
-
-                                                    text(
-                                                        "Quantidade: " +
-                                                                "${details.item.amountInGrams} g"
-                                                    ) {
-                                                        fontSize = 10.sp
-                                                        color = secondaryText
+                                                        text("Quantidade: ${item.amountInGrams} g") {
+                                                            fontSize = 10.sp
+                                                            color = secondaryText
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
-                                    }
+                                }
                             }
                         }
-                    }
+
                     divider(
                         thickness = 0.5.dp,
                         color = borderColor

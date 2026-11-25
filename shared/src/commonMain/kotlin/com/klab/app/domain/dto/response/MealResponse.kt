@@ -1,4 +1,4 @@
-package com.klab.app.domain.dto.meal
+package com.klab.app.domain.dto.response
 
 import com.klab.app.domain.dto.MacrosDTO
 import com.klab.app.domain.model.enumModel.MealType

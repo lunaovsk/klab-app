@@ -1,8 +1,8 @@
 package com.klab.app.service.usecase
 
-import com.klab.app.domain.dto.meal.MealItemRequest
-import com.klab.app.domain.dto.meal.MealItemResponse
-import com.klab.app.domain.dto.meal.MealItemUpdateRequest
+import com.klab.app.domain.dto.request.MealItemRequest
+import com.klab.app.domain.dto.response.MealItemResponse
+import com.klab.app.domain.dto.request.MealItemUpdateRequest
 import com.klab.app.domain.model.food.Food
 import com.klab.app.domain.model.meal.MealItem
 import com.klab.app.domain.model.meal.MealOption
@@ -24,18 +24,11 @@ class MealItemService(
 ) {
 
     suspend fun create(request: MealItemRequest): MealItemResponse {
-        val option = optionExistsValidator.validateExists(
-            mealOptionRepository.findOptionWithItems(request.optionId),
-            request.optionId
-        )
-        foodExistsValidator.validateExists(foodRepository.findById(request.foodId), request.foodId)
-        val item = option.addItem(request.toDomain())
-        val savedItem = if (item.id > 0L) {
-            mealItemRepository.update(item, request.optionId)
-            item
-        } else {
-            mealItemRepository.insert(item, request.optionId)
-        }
+        val option = optionExistsValidator.validateExists(mealOptionRepository.findOptionWithItems(request.optionId), request.optionId)
+        val food = foodExistsValidator.validateExists(foodRepository.findById(request.foodId), request.foodId)
+        val item = request.toDomain(food)
+        option.addItem(item)
+        val savedItem = mealItemRepository.insert(item, request.optionId)
         return savedItem.toResponse()
     }
 
@@ -50,16 +43,13 @@ class MealItemService(
 
     suspend fun update(request: MealItemUpdateRequest): MealItemResponse {
         val item = itemExistsValidator.validateExists(mealItemRepository.findById(request.id), request.id)
-        val updatedItem = item.defineAmountInGrams(request.toGramsAmount())
-        mealItemRepository.update(updatedItem, request.optionId)
-        return updatedItem.toResponse()
+        item.defineAmountInGrams(request.toGramsAmount())
+        mealItemRepository.update(item, request.optionId)
+        return item.toResponse()
     }
 
     suspend fun delete(optionId: Long, itemId: Long) {
-        val option = optionExistsValidator.validateExists(
-            mealOptionRepository.findOptionWithItems(optionId),
-            optionId
-        )
+        val option = optionExistsValidator.validateExists(mealOptionRepository.findOptionWithItems(optionId), optionId)
         option.removeItem(itemId)
         mealItemRepository.deleteById(itemId)
     }

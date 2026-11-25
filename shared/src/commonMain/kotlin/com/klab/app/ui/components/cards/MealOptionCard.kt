@@ -8,8 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.klab.app.domain.dto.MacrosDTO
-import com.klab.app.domain.dto.meal.MealEditorOption
-import com.klab.app.domain.dto.meal.MealItemDetailsResponse
+import com.klab.app.domain.dto.response.MealEditorOption
+import com.klab.app.domain.dto.response.MealItemDetailsResponse
 import com.klab.app.ui.components.FoodQuantityDialog
 import com.klab.app.ui.components.MainButton
 import com.klab.app.ui.components.SubText

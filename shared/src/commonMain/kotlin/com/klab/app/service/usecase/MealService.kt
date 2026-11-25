@@ -1,9 +1,10 @@
 package com.klab.app.service.usecase
 
 import com.klab.app.domain.dto.MacrosDTO
-import com.klab.app.domain.dto.meal.MealDistribRequest
-import com.klab.app.domain.dto.meal.MealResponse
-import com.klab.app.domain.dto.meal.MealUpdateRequest
+import com.klab.app.domain.dto.request.MealDistribRequest
+import com.klab.app.domain.dto.response.MealEditorData
+import com.klab.app.domain.dto.response.MealResponse
+import com.klab.app.domain.dto.request.MealUpdateRequest
 import com.klab.app.domain.model.food.Macros
 import com.klab.app.domain.model.meal.Meal
 import com.klab.app.domain.model.meal.MealPlan
@@ -13,6 +14,7 @@ import com.klab.app.domain.validation.EntityValidate
 import com.klab.app.domain.validation.MealPlanValidate
 import com.klab.app.infra.mapper.toDTO
 import com.klab.app.infra.mapper.toDomain
+import com.klab.app.infra.mapper.toEditorData
 import com.klab.app.infra.mapper.toResponse
 
 class MealService(
@@ -25,14 +27,10 @@ class MealService(
 
     suspend fun createMeals(planId: Long, requests: List<MealDistribRequest>): List<MealResponse> {
         percentageValidator.validate(requests.map { it.percentage })
-        val plan = planExistsValidator.validateExists(mealPlanRepository.findById(planId), planId)
-
+        val plan = planExistsValidator.validateExists(mealPlanRepository.findMealPlanById(planId), planId)
         return requests.map { request ->
             val mealGoal = calculateValidMealGoal(plan.goal, request.percentage)
             val meal = request.toDomain(mealGoal)
-            require(meal.getAllowedCalorieRange(mealGoal.calorie)) {
-                throw IllegalArgumentException("Meal calories are outside the allowed +-10% range of its goal.")
-            }
             plan.addMeal(meal)
             val savedMeal = mealRepository.add(meal, planId)
             savedMeal.toResponse()
@@ -56,24 +54,27 @@ class MealService(
         return meal.toResponse()
     }
 
+    suspend fun findEditorDataById(id: Long): MealEditorData {
+        val meal = mealExistsValidator.validateExists(mealRepository.findMealWithOptions(id), id)
+        return meal.toEditorData()
+    }
+
     suspend fun update(request: MealUpdateRequest): MealResponse {
         val meal = mealExistsValidator.validateExists(mealRepository.findMealWithOptions(request.id), request.id)
-        val newGoal = request.percentage?.let { perc ->
-            val plan = planExistsValidator.validateExists(mealPlanRepository.findById(request.planId), request.planId)
-            calculateValidMealGoal(plan.goal, perc)
-        }
-        val updatedMeal = meal.update(
-            name = request.name,
-            type = request.type,
-            displayOrder = request.displayOrder,
-            goal = newGoal
-        )
-        mealRepository.update(updatedMeal, request.planId)
-        return updatedMeal.toResponse()
+        val plan = planExistsValidator.validateExists(mealPlanRepository.findById(request.planId), request.planId)
+        val newGoal = calculateValidMealGoalOrNull(plan.goal, request.percentage)
+        meal.update(request.name,request.type,request.displayOrder, newGoal)
+        mealRepository.update(meal, request.planId)
+        return meal.toResponse()
     }
 
     suspend fun delete(id: Long) {
         mealExistsValidator.validateDeleted(mealRepository.deleteById(id), id)
+    }
+
+    private fun calculateValidMealGoalOrNull(planGoal: Macros, percentage: Int?): Macros? {
+        val validPercentage = percentage ?: return null
+        return calculateValidMealGoal(planGoal, validPercentage)
     }
 
     private fun calculateValidMealGoal(planGoal: Macros, percentage: Int): Macros {

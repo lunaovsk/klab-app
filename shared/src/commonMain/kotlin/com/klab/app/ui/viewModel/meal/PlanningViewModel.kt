@@ -7,7 +7,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewmodel.initializer
 import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.service.usecase.MealService
-import com.klab.app.service.usecase.PlanningPdfService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

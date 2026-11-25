@@ -1,4 +1,4 @@
-package com.klab.app.domain.dto.meal
+package com.klab.app.domain.dto.request
 
 data class MealPlanUpdateRequest(
     val id: Long,

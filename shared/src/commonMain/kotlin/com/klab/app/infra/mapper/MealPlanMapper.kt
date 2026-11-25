@@ -1,12 +1,11 @@
 package com.klab.app.infra.mapper
 
-import com.klab.app.domain.dto.meal.MealPlanRequest
-import com.klab.app.domain.dto.meal.MealPlanResponse
-import com.klab.app.domain.model.food.Macros
+import com.klab.app.domain.dto.request.MealPlanRequest
+import com.klab.app.domain.dto.response.MealPlanResponse
 import com.klab.app.domain.model.meal.Meal
 import com.klab.app.domain.model.meal.MealPlan
-import com.klab.app.infra.local.MealEntity
 import com.klab.app.infra.local.MealPlanEntity
+import com.klab.app.infra.local.relations.MealsWithOptions
 import com.klab.app.infra.local.relations.PlanWithMeal
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -40,7 +39,7 @@ fun PlanWithMeal.toDomain(): MealPlan {
         title = this.plan.title,
         createdAt = LocalDate.parse(this.plan.createdAt),
         goal = this.plan.macrosEntity.toDomain(),
-        meals = this.entity.map(MealEntity::toDomain).toMutableSet(),
+        meals = this.entity.map(MealsWithOptions::toDomain).toMutableSet(),
         isActive = this.plan.isActive
     )
 }

@@ -1,7 +1,7 @@
 package com.klab.app.ui.viewModel.meal
 
-import com.klab.app.domain.dto.meal.MealEditorData
-import com.klab.app.domain.dto.meal.MealEditorOption
+import com.klab.app.domain.dto.response.MealEditorData
+import com.klab.app.domain.dto.response.MealEditorOption
 
 data class MealEditorState(
     val isLoading: Boolean = false,

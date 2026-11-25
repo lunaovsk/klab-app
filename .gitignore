@@ -32,3 +32,4 @@ $RECYCLE.BIN/
 *.log
 /releases/
 /crashlytics-build.properties
+/shared/schemas/
