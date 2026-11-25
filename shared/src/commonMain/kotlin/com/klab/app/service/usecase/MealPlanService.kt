@@ -1,9 +1,9 @@
 package com.klab.app.service.usecase
 
 import com.klab.app.domain.dto.MacrosDTO
-import com.klab.app.domain.dto.meal.MealPlanRequest
-import com.klab.app.domain.dto.meal.MealPlanResponse
-import com.klab.app.domain.dto.meal.MealPlanUpdateRequest
+import com.klab.app.domain.dto.request.MealPlanRequest
+import com.klab.app.domain.dto.response.MealPlanResponse
+import com.klab.app.domain.dto.request.MealPlanUpdateRequest
 import com.klab.app.domain.model.meal.MealPlan
 import com.klab.app.domain.repository.MealPlanRepository
 import com.klab.app.domain.validation.EntityValidate
@@ -17,6 +17,7 @@ import com.klab.app.infra.mapper.toResponse
 class MealPlanService(
     private val mealPlanRepository: MealPlanRepository,
     private val percentageValidator: MealPlanValidate<List<Int>>,
+    private val updateValidator: MealPlanValidate<MealPlanUpdateRequest>,
     private val planExistsValidator: EntityValidate<MealPlan>
 ) {
 
@@ -57,13 +58,11 @@ class MealPlanService(
 
     suspend fun update(request: MealPlanUpdateRequest): MealPlanResponse {
         val plan = planExistsValidator.validateExists(mealPlanRepository.findMealPlanById(request.id), request.id)
+        updateValidator.validate(request)
         val newGoal = request.toMacrosOrNull()
         newGoal?.isValid()
-        val updatedPlan = plan.update(
-            title = request.title,
-            goal = newGoal
-        )
-        mealPlanRepository.update(updatedPlan)
-        return updatedPlan.toResponse()
+        plan.update(request.title, newGoal)
+        mealPlanRepository.update(plan)
+        return plan.toResponse()
     }
 }

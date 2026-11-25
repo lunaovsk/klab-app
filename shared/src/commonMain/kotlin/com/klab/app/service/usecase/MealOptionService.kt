@@ -1,181 +1,65 @@
 package com.klab.app.service.usecase
 
-import com.klab.app.domain.dto.meal.*
-import com.klab.app.domain.model.food.Macros
-import com.klab.app.domain.model.meal.GramsAmount
-import com.klab.app.domain.model.meal.MealItem
+import com.klab.app.domain.dto.request.MealOptionRequest
+import com.klab.app.domain.dto.request.MealOptionUpdateRequest
+import com.klab.app.domain.dto.response.MealEditorOption
+import com.klab.app.domain.dto.response.MealOptionResponse
+import com.klab.app.domain.dto.response.MealResponse
+import com.klab.app.domain.model.food.Food
+import com.klab.app.domain.model.meal.Meal
 import com.klab.app.domain.model.meal.MealOption
-import com.klab.app.domain.repository.MealRepository
 import com.klab.app.domain.repository.MealOptionRepository
-import com.klab.app.domain.repository.MealItemRepository
-import com.klab.app.domain.validation.MealEditorValidate
-import com.klab.app.domain.validation.MealGoalValidate
-import com.klab.app.infra.mapper.toDTO
+import com.klab.app.domain.repository.MealRepository
+import com.klab.app.domain.validation.EntityValidate
+import com.klab.app.infra.mapper.toDomain
+import com.klab.app.infra.mapper.toDraftDomain
+import com.klab.app.infra.mapper.toEditorOption
 import com.klab.app.infra.mapper.toResponse
-import org.koin.core.component.getScopeId
 
 class MealOptionService(
-    private val mealRepository: MealRepository,
     private val optionRepository: MealOptionRepository,
-    private val itemRepository: MealItemRepository,
-    private val foodService: FoodService,
-    private val mealGoalValidator: MealGoalValidate,
-    private val mealEditorValidator: MealEditorValidate
+    private val mealRepository: MealRepository,
+    private val mealExistsValidator: EntityValidate<Meal>,
+    private val optionExistsValidator: EntityValidate<MealOption>
 ) {
 
-    suspend fun getMealEditor(mealId: Long): MealEditorData {
-
-        val meal = mealRepository.findById(mealId)
-            ?: throw NoSuchElementException(
-                "Refeição não encontrada."
-            )
-
-        val options = optionRepository.findByMealId(mealId)
-            .sortedBy { it.displayOrder }
-            .map { option ->
-
-                val details = getOptionItems(option.id)
-
-                val total = sumMacros(
-                    details.map {
-                        it.food.amountPer100g.calculateForPortion(
-                            it.item.amountInGrams
-                        )
-                    }
-                )
-
-                MealEditorOption(
-                    id = option.id,
-                    title = option.title,
-                    displayOrder = option.displayOrder,
-                    items = details,
-                    total = total.toDTO(),
-                    isWithinGoal = mealGoalValidator.isWithinGoal(
-                        total = total,
-                        goal = meal.goal
-                    )
-                )
-            }
-
-        return MealEditorData(
-            meal = meal.toResponse(),
-            options = options
-        )
+    suspend fun create(request: MealOptionRequest): MealOptionResponse {
+        val meal = mealExistsValidator.validateExists(mealRepository.findMealWithOptions(request.mealId), request.mealId)
+        val option = request.toDomain()
+        meal.addOption(option)
+        val savedOption = optionRepository.insert(option, request.mealId)
+        return savedOption.toResponse()
     }
 
-    suspend fun previewDraft(mealId: Long, draftId: Long, items: List<Pair<Long, Float>>): MealEditorOption {
-
-        val meal = mealRepository.findById(mealId)
-            ?: throw NoSuchElementException("Refeição não encontrada.")
-
-        mealEditorValidator.validateUniqueFoods(items.map { it.first })
-
-        val details = getDraftItems(items)
-
-        val total = calculateTotal(details)
-
-        return MealEditorOption(
-            id = draftId,
-            title = "Rascunho",
-            displayOrder = 0,
-            items = details,
-            total = total.toDTO(),
-            isWithinGoal = items.isNotEmpty() &&
-                    mealGoalValidator.isWithinGoal(total = total, goal = meal.goal)
-        )
+    suspend fun findById(id: Long): MealOptionResponse {
+        val option = optionExistsValidator.validateExists(optionRepository.findOptionWithItems(id), id)
+        return option.toResponse()
     }
 
-    suspend fun saveCompletedOptions(mealId: Long, drafts: List<List<Pair<Long, Float>>>): List<Long> {
-
-        val meal = mealRepository.findById(mealId)
-            ?: throw NoSuchElementException("Refeição não encontrada.")
-
-        if (drafts.isEmpty()) {
-            throw IllegalArgumentException("Adicione pelo menos uma opção.")
-        }
-
-        val validatedItems = drafts.map { draft ->
-
-            if (draft.isEmpty()) {
-                throw IllegalArgumentException("Todas as opções precisam conter alimentos.")
-            }
-
-            mealEditorValidator.validateUniqueFoods(draft.map { it.first })
-
-            val details = getDraftItems(draft)
-
-            val total = calculateTotal(details)
-
-            mealGoalValidator.validateCompletedOption(total = total, goal = meal.goal)
-
-            details.map { details ->
-                MealItem(id = 0L, foodId = details.item.foodId, amountInGrams = GramsAmount(details.item.amountInGrams))
-            }
-        }
-
-        val existingOptions = optionRepository.findByMealId(mealId)
-
-        val firstOrder = (existingOptions.maxOfOrNull { it.displayOrder } ?: 0) + 1
-
-        val options = validatedItems.mapIndexed { index, items ->
-
-            val order = firstOrder + index
-
-            MealOption(id = 0L, title = "Opção $order", displayOrder = order, items = items.toMutableSet())
-        }
-
-        return optionRepository.insertAll(mealId = mealId, options = options)
+    suspend fun findByMealId(mealId: Long): List<MealOptionResponse> {
+        return optionRepository.findByMealId(mealId).map(MealOption::toResponse)
     }
 
-    suspend fun removeOption(mealId: Long, optionId: Long) {
-        val options = optionRepository.findByMealId(mealId)
+    suspend fun update(request: MealOptionUpdateRequest): MealOptionResponse {
+        val option = optionExistsValidator.validateExists(optionRepository.findOptionWithItems(request.id), request.id)
+        option.update(request.title, request.displayOrder)
+        optionRepository.update(option, request.mealId)
+        return option.toResponse()
+    }
 
-        mealEditorValidator.validateOptionBelongsToMeal(
-            optionId = optionId,
-            mealOptionIds = options.map { it.id }
-        )
+    fun previewDraft(
+        draftId: Long,
+        meal: MealResponse,
+        items: List<Pair<Food, Float>>
+    ): MealEditorOption {
+        val domainMeal = meal.toDomain()
+        val draftOption = items.toDraftDomain()
+        return draftOption.toEditorOption(domainMeal, overrideId = draftId)
+    }
 
+    suspend fun delete(mealId: Long, optionId: Long) {
+        val meal = mealExistsValidator.validateExists(mealRepository.findMealWithOptions(mealId), mealId)
+        meal.removeOption(optionId)
         optionRepository.deleteById(optionId)
-    }
-
-    private suspend fun getOptionItems(optionId: Long): List<MealItemDetailsResponse> {
-        val items = itemRepository.findByOptionId(optionId)
-
-        return items.map { item ->
-            MealItemDetailsResponse(
-                item = item.toResponse(),
-                food = foodService.getById(item.foodId)
-            )
-        }
-    }
-
-    private suspend fun getDraftItems(items: List<Pair<Long, Float>>): List<MealItemDetailsResponse> {
-
-        return items.map { (foodId, grams) ->
-            mealEditorValidator.validateGrams(grams)
-            val food = foodService.getById(foodId)
-            MealItemDetailsResponse(
-                item = MealItemResponse(id = 0L, foodId = foodId, amountInGrams = grams),
-                food = food
-            )
-        }
-    }
-
-    private fun calculateTotal( details: List<MealItemDetailsResponse>): Macros {
-
-        val portions = details.map { details ->
-            details.food.amountPer100g.calculateForPortion(details.item.amountInGrams)
-        }
-        return sumMacros(portions)
-    }
-
-    private fun sumMacros(macros: List<Macros>): Macros {
-
-        return Macros(
-            calorie = macros.sumOf { it.calorie.toDouble() }.toFloat(),
-            carb = macros.sumOf { it.carb.toDouble() }.toFloat(),
-            protein = macros.sumOf { it.protein.toDouble() }.toFloat(),
-            fat = macros.sumOf { it.fat.toDouble() }.toFloat()
-        )
     }
 }
