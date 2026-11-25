@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.klab.app.domain.dto.meal.MealDistribRequest
+import com.klab.app.domain.dto.request.MealDistribRequest
 import com.klab.app.service.usecase.MealService
 import com.klab.app.ui.viewModel.meal.MealDistriState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +23,14 @@ class MealDistributionViewModel(
 
     fun previewMacros(planId: Long, request: MealDistribRequest, index: Int) {
         viewModelScope.launch {
-            val macros = mealService.previewMacros(planId = planId, request = request)
-            changeUiState.update { state -> state.copy(mealMacros = state.mealMacros + (index to macros)) }
+            try {
+                val macros = mealService.previewMacros(planId = planId, request = request)
+                changeUiState.update { state -> state.copy(mealMacros = state.mealMacros + (index to macros)) }
+            } catch (exception: Exception) {
+                changeUiState.update { state ->
+                    state.copy(error = exception.message ?: "Erro ao calcular prévia da refeição.")
+                }
+            }
         }
     }
 

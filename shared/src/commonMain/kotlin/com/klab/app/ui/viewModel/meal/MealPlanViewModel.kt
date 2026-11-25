@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.klab.app.domain.dto.MacrosDTO
-import com.klab.app.domain.dto.meal.MealPlanRequest
+import com.klab.app.domain.dto.request.MealPlanRequest
 import com.klab.app.service.usecase.MealPlanService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

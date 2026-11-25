@@ -23,8 +23,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.klab.app.service.usecase.MealPlanService
-import com.klab.app.service.usecase.PlanningPdfService
 import com.klab.app.ui.components.MainButton
+import com.klab.app.ui.components.SubText
 
 @Composable
 fun PlanningOverviewScreen(
@@ -36,7 +36,6 @@ fun PlanningOverviewScreen(
 
     val mealService: MealService = koinInject()
     val mealPlanService: MealPlanService = koinInject()
-    val pdfService: PlanningPdfService = koinInject()
 
     val viewModel: PlanningViewModel = viewModel(factory = PlanningViewModel.factory(mealPlanService,mealService))
     val uiState by viewModel.uiState.collectAsState()
@@ -127,6 +126,13 @@ fun PlanningOverviewScreen(
                         optionsCount = meal.options.size,
                         calories = meal.goal.calorie.toString(),
                         onClick = { onMealClick(meal.id) }
+                    )
+                }
+
+                uiState.error?.let { error ->
+                    SubText(
+                        text = error,
+                        color = Errors
                     )
                 }
 

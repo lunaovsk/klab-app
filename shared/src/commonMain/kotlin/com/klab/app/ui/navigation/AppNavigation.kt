@@ -16,7 +16,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.savedstate.read
+import com.klab.app.service.usecase.MealItemService
 import com.klab.app.service.usecase.MealOptionService
+import com.klab.app.service.usecase.MealService
 import com.klab.app.ui.screens.*
 import com.klab.app.ui.screens.enums.SearchModeFood
 import com.klab.app.ui.viewModel.meal.MealEditorViewModel
@@ -134,11 +136,13 @@ fun AppNavigation() {
                 val editorEntry = navController.previousBackStackEntry
                     ?: return@composable
 
-                val editorService: MealOptionService = koinInject()
+                val mealService: MealService = koinInject()
+                val mealOptionService: MealOptionService = koinInject()
+                val mealItemService: MealItemService = koinInject()
 
                 val editorViewModel: MealEditorViewModel = viewModel(
                     viewModelStoreOwner = editorEntry,
-                    factory = MealEditorViewModel.factory(editorService)
+                    factory = MealEditorViewModel.factory(mealService, mealOptionService, mealItemService)
                 )
 
                 FoodSearchScreen(
