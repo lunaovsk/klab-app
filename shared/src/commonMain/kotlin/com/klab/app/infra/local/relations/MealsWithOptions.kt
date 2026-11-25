@@ -5,12 +5,11 @@ import androidx.room.Relation
 import com.klab.app.infra.local.MealEntity
 import com.klab.app.infra.local.MealOptionEntity
 
-class MealsWithOptions (
+class MealsWithOptions(
 
     @Embedded
     val meal: MealEntity,
-    @Relation(parentColumn = "id", entityColumn = "fk_meal_id")
-    val options: List<MealOptionEntity>
+    @Relation(entity = MealOptionEntity::class, parentColumn = "id", entityColumn = "fk_meal_id")
+    val options: List<OptionsWithItem>
 
-) {
-}
+)

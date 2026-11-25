@@ -2,6 +2,7 @@ package com.klab.app.database
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.klab.app.di.appDatabaseBuilder
 import com.klab.app.infra.database.KlabDatabase
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSDocumentDirectory
@@ -9,6 +10,10 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 
 class BuilderIOS {
+
+    fun initDatabase() {
+        appDatabaseBuilder = getDatabaseBuilder()
+    }
 
     fun getDatabaseBuilder (): RoomDatabase.Builder<KlabDatabase> {
         val dbFilePath = documentDirectory() + "/klab.db"

@@ -1,7 +1,7 @@
 package com.klab.app.ui.viewModel.meal
 
-import com.klab.app.domain.dto.meal.MealPlanResponse
-import com.klab.app.domain.dto.meal.MealResponse
+import com.klab.app.domain.dto.response.MealPlanResponse
+import com.klab.app.domain.dto.response.MealResponse
 
 data class MealPlanState(
     val meals: List<MealResponse> = emptyList(),

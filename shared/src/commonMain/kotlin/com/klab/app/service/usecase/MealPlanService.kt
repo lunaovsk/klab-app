@@ -1,39 +1,68 @@
 package com.klab.app.service.usecase
 
 import com.klab.app.domain.dto.MacrosDTO
-import com.klab.app.domain.dto.meal.MealPlanRequest
-import com.klab.app.domain.dto.meal.MealPlanResponse
-import com.klab.app.domain.model.food.Macros
+import com.klab.app.domain.dto.request.MealPlanRequest
+import com.klab.app.domain.dto.response.MealPlanResponse
+import com.klab.app.domain.dto.request.MealPlanUpdateRequest
+import com.klab.app.domain.model.meal.MealPlan
 import com.klab.app.domain.repository.MealPlanRepository
-import com.klab.app.domain.validation.DailyGoalsPlan
+import com.klab.app.domain.validation.EntityValidate
+import com.klab.app.domain.validation.MealPlanValidate
 import com.klab.app.infra.mapper.toDTO
 import com.klab.app.infra.mapper.toDomain
+import com.klab.app.infra.mapper.toMacros
+import com.klab.app.infra.mapper.toMacrosOrNull
 import com.klab.app.infra.mapper.toResponse
 
 class MealPlanService(
     private val mealPlanRepository: MealPlanRepository,
-    private val dailyGoalsValidator: DailyGoalsPlan
+    private val percentageValidator: MealPlanValidate<List<Int>>,
+    private val updateValidator: MealPlanValidate<MealPlanUpdateRequest>,
+    private val planExistsValidator: EntityValidate<MealPlan>
 ) {
 
     suspend fun create(request: MealPlanRequest): MealPlanResponse {
-        dailyGoalsValidator.validate(request)
-        val savedPlan = mealPlanRepository.insert(request.toDomain())
+        percentageValidator.validate(listOf(request.carbosPerc, request.proteinPerc, request.fatPerc))
+        val plan = request.toDomain()
+        plan.goal.isValid()
+        val savedPlan = mealPlanRepository.insert(plan)
         return savedPlan.toResponse()
     }
 
     suspend fun findById(id: Long): MealPlanResponse {
-        val plan = mealPlanRepository.findMealPlanById(id)
-            ?: throw NoSuchElementException("Planejamento não encontrado com o id: $id")
+        val plan = planExistsValidator.validateExists(mealPlanRepository.findMealPlanById(id), id)
         return plan.toResponse()
     }
 
+    suspend fun findAll(): List<MealPlanResponse> {
+        return mealPlanRepository.findAll().map { it.toResponse() }
+    }
+
+    suspend fun findAllActive(): List<MealPlanResponse> {
+        return mealPlanRepository.findAll()
+            .filter { it.isActive }
+            .map { it.toResponse() }
+    }
+
     fun previewMacros(request: MealPlanRequest): MacrosDTO {
-        dailyGoalsValidator.validateForPreview(request)
-        return Macros.fromCalories(
-            calories = request.calories,
-            carbPercentage = request.carbosPerc,
-            proteinPercentage = request.proteinPerc,
-            fatPercentage = request.fatPerc
-        ).toDTO()
+        val macros = request.toMacros()
+        macros.isValid()
+        return macros.toDTO()
+    }
+
+    suspend fun delete(id: Long) {
+        val plan = planExistsValidator.validateExists(mealPlanRepository.findMealPlanById(id), id)
+        plan.desactivate()
+        mealPlanRepository.update(plan)
+    }
+
+    suspend fun update(request: MealPlanUpdateRequest): MealPlanResponse {
+        val plan = planExistsValidator.validateExists(mealPlanRepository.findMealPlanById(request.id), request.id)
+        updateValidator.validate(request)
+        val newGoal = request.toMacrosOrNull()
+        newGoal?.isValid()
+        plan.update(request.title, newGoal)
+        mealPlanRepository.update(plan)
+        return plan.toResponse()
     }
 }

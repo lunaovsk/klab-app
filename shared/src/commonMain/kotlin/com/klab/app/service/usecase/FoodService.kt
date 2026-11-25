@@ -3,12 +3,14 @@ package com.klab.app.service.usecase
 import androidx.paging.PagingData
 import com.klab.app.domain.model.food.Food
 import com.klab.app.domain.repository.FoodRepository
+import com.klab.app.domain.validation.EntityValidate
 import com.klab.app.domain.validation.FoodValidate
 import kotlinx.coroutines.flow.Flow
 
 class FoodService(
     private val foodRepository: FoodRepository,
-    private val stringValidator: FoodValidate<String>
+    private val stringValidator: FoodValidate<String>,
+    private val foodExistsValidator: EntityValidate<Food>
 ) {
 
     fun search(foodItens: String): Flow<PagingData<Food>> {
@@ -22,17 +24,17 @@ class FoodService(
     }
 
     suspend fun getById(foodId: Long): Food {
-        return foodRepository.findById(foodId)
-            ?: throw NoSuchElementException("No food found with id $foodId")
+        return foodExistsValidator.validateExists(foodRepository.findById(foodId), foodId)
     }
 
     suspend fun listAllGroups(): List<String> {
         return foodRepository.listAllGroups()
     }
 
-
     fun searchDescriptionByGroup(query: String, group: String): Flow<PagingData<Food>> {
-        return foodRepository.searchDescriptionByGroup(query = query, group = group)
+        val validQuery = stringValidator.validateFood(query)
+        val validGroup = stringValidator.validateFood(group)
+        return foodRepository.searchDescriptionByGroup(query = validQuery, group = validGroup)
     }
 
 }

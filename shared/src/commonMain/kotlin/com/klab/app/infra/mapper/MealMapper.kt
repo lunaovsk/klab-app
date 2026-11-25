@@ -1,14 +1,15 @@
 package com.klab.app.infra.mapper
 
-import com.klab.app.domain.dto.meal.MealDistribRequest
-import com.klab.app.domain.dto.meal.MealResponse
+import com.klab.app.domain.dto.request.MealDistribRequest
+import com.klab.app.domain.dto.response.MealEditorData
+import com.klab.app.domain.dto.response.MealResponse
 import com.klab.app.domain.model.enumModel.MealType
 import com.klab.app.domain.model.food.Macros
 import com.klab.app.domain.model.meal.Meal
 import com.klab.app.domain.model.meal.MealOption
 import com.klab.app.infra.local.MealEntity
-import com.klab.app.infra.local.MealOptionEntity
 import com.klab.app.infra.local.relations.MealsWithOptions
+import com.klab.app.infra.local.relations.OptionsWithItem
 
 fun MealEntity.toDomain(): Meal {
     return Meal(
@@ -39,16 +40,16 @@ fun MealsWithOptions.toDomain(): Meal {
         type = MealType.valueOf(this.meal.type),
         displayOrder = this.meal.order,
         goal = this.meal.macrosEntity.toDomain(),
-        options = this.options.map(MealOptionEntity::toDomain).toMutableSet()
+        options = this.options.map(OptionsWithItem::toDomain).toMutableSet()
     )
 }
 
-fun MealDistribRequest.toDomain(planGoal: Macros): Meal {
+fun MealDistribRequest.toDomain(mealGoal: Macros): Meal {
     return Meal(
         name = this.name.trim(),
         type = this.type,
         displayOrder = this.displayOrder,
-        goal = planGoal.calculateForPortion(this.percentage.toFloat())
+        goal = mealGoal
     )
 }
 
@@ -60,5 +61,25 @@ fun Meal.toResponse(): MealResponse {
         displayOrder = this.displayOrder,
         goal = this.goal.toDTO(),
         options = this.options.map(MealOption::toResponse).toSet()
+    )
+}
+
+fun MealResponse.toDomain(): Meal {
+    return Meal(
+        id = this.id,
+        name = this.name,
+        type = this.type,
+        displayOrder = this.displayOrder,
+        goal = this.goal.toDomain()
+    )
+}
+
+fun Meal.toEditorData(): MealEditorData {
+    val editorOptions = this.options
+        .sortedBy { it.displayOrder }
+        .map { it.toEditorOption(this) }
+    return MealEditorData(
+        meal = this.toResponse(),
+        options = editorOptions
     )
 }

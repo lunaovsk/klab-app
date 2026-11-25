@@ -6,6 +6,7 @@ import com.klab.app.infra.dao.MealItemDao
 import com.klab.app.infra.local.MealItemEntity
 import com.klab.app.infra.mapper.toDomain
 import com.klab.app.infra.mapper.toEntity
+import com.klab.app.infra.mapper.withGeneratedId
 
 class MealItemRepositoryImpl(
 
@@ -13,8 +14,9 @@ class MealItemRepositoryImpl(
 
 ) : MealItemRepository {
 
-    override suspend fun insert(mealItem: MealItem, optionId: Long): Long {
-        return mealItemDao.insert(mealItem.toEntity(optionId))
+    override suspend fun insert(mealItem: MealItem, optionId: Long): MealItem {
+        val generatedId = mealItemDao.insert(mealItem.toEntity(optionId))
+        return mealItem.withGeneratedId(generatedId)
     }
 
     override suspend fun findById(id: Long): MealItem? {

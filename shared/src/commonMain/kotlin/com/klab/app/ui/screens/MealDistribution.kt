@@ -24,8 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.klab.app.domain.dto.meal.MealDistribRequest
-import com.klab.app.domain.dto.meal.MealPlanRequest
+import com.klab.app.domain.dto.request.MealDistribRequest
 import com.klab.app.domain.model.enumModel.MealType
 import com.klab.app.service.usecase.MealService
 import com.klab.app.ui.components.MainButton

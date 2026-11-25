@@ -42,8 +42,12 @@ class FoodSearchViewModel( private val foodService: FoodService) : ViewModel() {
         .distinctUntilChanged()
         .flatMapLatest { (query, group) ->
             when {
+                group != null && query.isNotBlank() -> {
+                    foodService.searchDescriptionByGroup(query, group)
+                }
+
                 group != null -> {
-                    foodService.searchDescriptionByGroup(query,group)
+                    foodService.getByGroup(group)
                 }
 
                 query.isNotBlank() -> {
