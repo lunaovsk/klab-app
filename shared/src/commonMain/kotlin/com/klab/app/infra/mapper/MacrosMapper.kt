@@ -1,8 +1,8 @@
 package com.klab.app.infra.mapper
 
 import com.klab.app.domain.dto.MacrosDTO
-import com.klab.app.domain.dto.meal.MealPlanRequest
-import com.klab.app.domain.dto.meal.MealPlanUpdateRequest
+import com.klab.app.domain.dto.request.MealPlanRequest
+import com.klab.app.domain.dto.request.MealPlanUpdateRequest
 import com.klab.app.domain.model.food.Macros
 import com.klab.app.infra.local.MacrosEntity
 
