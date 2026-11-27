@@ -30,7 +30,7 @@ fun PlanningCard(
         modifier = modifier
             .fillMaxWidth()
             .background(
-                color = MaterialTheme.colorScheme.surface,
+                color = WhiteColor,
                 shape = RoundedCornerShape(16.dp)
             )
             .padding(16.dp),
@@ -60,7 +60,7 @@ fun PlanningCard(
             )
         }
         TextButton(onClick = onClick) {
-            Text(text = "Detalhar", color = GreenDetails)
+            Text(text = "Detalhar", color = Button)
         }
     }
 }

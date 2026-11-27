@@ -7,7 +7,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import com.klab.app.ui.theme.*
 
@@ -31,10 +30,15 @@ fun FoodSearchField(
         singleLine = true,
         shape = MaterialTheme.shapes.large,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = GreenDetails,
-            unfocusedBorderColor = SecondaryTexts,
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent
+            focusedBorderColor = Button,
+            unfocusedBorderColor = BorderFields,
+            focusedContainerColor = WhiteColor,
+            unfocusedContainerColor = WhiteColor,
+            focusedTextColor = MainTexts,
+            unfocusedTextColor = MainTexts,
+            focusedPlaceholderColor = SecondaryTexts,
+            unfocusedPlaceholderColor = SecondaryTexts,
+            cursorColor = Button
         )
     )
 }

@@ -1,24 +1,29 @@
 package com.klab.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.klab.app.service.usecase.MealItemService
 import com.klab.app.service.usecase.MealOptionService
 import com.klab.app.service.usecase.MealService
+import com.klab.app.ui.components.BackButton
 import com.klab.app.ui.components.FoodQuantityDialog
 import com.klab.app.ui.components.MainButton
 import com.klab.app.ui.components.SectionTitle
 import com.klab.app.ui.components.SubText
 import com.klab.app.ui.components.cards.MealGoalCard
 import com.klab.app.ui.components.cards.MealOptionCard
+import com.klab.app.ui.navigation.RegisterBackNavigation
 import com.klab.app.ui.theme.*
 import com.klab.app.ui.viewModel.meal.MealEditorViewModel
 import org.koin.compose.koinInject
@@ -45,6 +50,24 @@ fun MealEditorScreen(
         mutableStateOf(false)
     }
 
+    val canNavigateBack = !uiState.isLoading && !uiState.isSaving
+
+    val handleBack: () -> Unit = {
+
+        if (canNavigateBack) {
+
+            if (uiState.drafts.isNotEmpty()) {
+                showExitDialog = true
+            } else {
+                onBack()
+            }
+        }
+    }
+
+    RegisterBackNavigation(
+        onBack = handleBack
+    )
+
     LaunchedEffect(mealId) {
         viewModel.load(mealId)
     }
@@ -59,18 +82,10 @@ fun MealEditorScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
 
-            TextButton(
-                onClick = {
-                    if (uiState.drafts.isNotEmpty()) {
-                        showExitDialog = true
-                    } else {
-                        onBack()
-                    }
-                },
-                enabled = !uiState.isSaving
-            ) {
-                Text("← Voltar", color = MainTexts)
-            }
+            BackButton(
+                onClick = handleBack,
+                enabled = canNavigateBack
+            )
 
             if (uiState.isLoading && data == null) {
                 CircularProgressIndicator(color = GreenDetails)
@@ -135,8 +150,7 @@ fun MealEditorScreen(
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme
-                                    .colorScheme.surfaceVariant
+                                containerColor = Outlines
                             )
                         ) {
                             Column(
@@ -151,7 +165,7 @@ fun MealEditorScreen(
                                         Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = "Nova opção ${index + 1}",
+                                        text = "Nova opção",
                                         style = MaterialTheme
                                             .typography.titleMedium
                                     )
@@ -188,7 +202,6 @@ fun MealEditorScreen(
                                         SubText(
                                             text = "${details.item.amountInGrams} g"
                                         )
-
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement =
@@ -202,7 +215,7 @@ fun MealEditorScreen(
                                                 enabled = !uiState.isSaving &&
                                                         !isPreviewLoading
                                             ) {
-                                                Text("Editar")
+                                                Text("Editar", color = Button)
                                             }
 
                                             TextButton(
@@ -223,9 +236,10 @@ fun MealEditorScreen(
                                                 )
                                             }
                                         }
+
                                     }
 
-                                    HorizontalDivider()
+                                    HorizontalDivider(color=BorderLines)
                                 }
 
                                 if (preview != null && !isPreviewLoading) {
@@ -240,12 +254,12 @@ fun MealEditorScreen(
                                         text = if (preview.isWithinGoal) {
                                             "Opção completa"
                                         } else {
-                                            "Opção incompleta"
+                                            "Opção fora da meta!"
                                         },
                                         color = if (preview.isWithinGoal) {
                                             GreenDetails
                                         } else {
-                                            SecondaryTexts
+                                            Errors
                                         }
                                     )
                                 }
@@ -294,7 +308,8 @@ fun MealEditorScreen(
                 if (uiState.isSaving) {
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
-                        color = GreenDetails
+                        color = GreenDetails,
+                        trackColor = BorderLines
                     )
                 }
 
@@ -309,7 +324,13 @@ fun MealEditorScreen(
                         },
                         enabled = !uiState.isSaving &&
                                 !uiState.isLoading,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f).height(56.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = WhiteColor,
+                            contentColor = Button
+                        ),
+                        border = BorderStroke(1.dp, Button)
                     ) {
                         Text("+ Adicionar")
                     }
@@ -346,7 +367,7 @@ fun MealEditorScreen(
                             onBack()
                         }
                     ) {
-                        Text("Descartar e sair")
+                        Text(text="Descartar e sair", color = Errors)
                     }
                 },
                 dismissButton = {
@@ -355,7 +376,7 @@ fun MealEditorScreen(
                             showExitDialog = false
                         }
                     ) {
-                        Text("Continuar editando")
+                        Text(text="Continuar editando", color = Button)
                     }
                 }
             )

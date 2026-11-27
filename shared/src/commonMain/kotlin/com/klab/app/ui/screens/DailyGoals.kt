@@ -28,6 +28,7 @@ import com.klab.app.domain.dto.request.MealPlanRequest
 import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.ui.components.*
 import com.klab.app.ui.components.cards.MacronutrientCard
+import com.klab.app.ui.navigation.RegisterBackNavigation
 import com.klab.app.ui.theme.*
 import com.klab.app.ui.viewModel.meal.MealPlanViewModel
 import org.koin.compose.koinInject
@@ -35,7 +36,9 @@ import org.koin.compose.koinInject
 @Composable
 @Preview
 fun DailyGoalsScreen(
-    onContinue: (Long) -> Unit = {}
+    onContinue: (Long) -> Unit = {},
+    onBack: () -> Unit = {},
+    planId: Long? = null
 ) {
     val mealPlanService: MealPlanService = koinInject()
     val viewModel: MealPlanViewModel = viewModel(
@@ -43,16 +46,27 @@ fun DailyGoalsScreen(
     )
     val uiState by viewModel.uiState.collectAsState()
 
-    var dailyCalories by remember { mutableStateOf("") }
-    var carbohydrates by remember { mutableStateOf("") }
-    var proteins by remember { mutableStateOf("") }
-    var lipids by remember { mutableStateOf("") }
+    val handleBack: () -> Unit = {
+        if (!uiState.isLoading) {
+            onBack()
+        }
+    }
 
-    var planTitle by remember { mutableStateOf("") }
+    RegisterBackNavigation(
+        onBack = handleBack
+    )
+    val dailyCalories = uiState.caloriesInput
+    val carbohydrates = uiState.carbohydratesInput
+    val proteins = uiState.proteinsInput
+    val lipids = uiState.lipidsInput
+    val planTitle = uiState.planTitle
+    val currentPlanId = uiState.currentPlanId
 
-    LaunchedEffect(uiState.createdPlan) {
-        uiState.createdPlan?.let { plan ->
-            viewModel.consumeCreatedPlan()
+    LaunchedEffect(uiState.savedPlan) {
+        uiState.savedPlan?.let { plan ->
+
+            viewModel.consumeSavedPlan()
+
             onContinue(plan.id)
         }
     }
@@ -101,6 +115,10 @@ fun DailyGoalsScreen(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            BackButton(
+                onClick = handleBack,
+                enabled = !uiState.isLoading
+            )
             SectionTitle(
                 text = "Metas diárias",
                 fontSize = 24.sp
@@ -112,14 +130,14 @@ fun DailyGoalsScreen(
 
             TextInput(
                 value = planTitle,
-                onValueChange = { planTitle = it },
+                onValueChange = viewModel::onTitleChange,
                 label = "Nome da meta",
                 placeholder = "Nome plano alimentar"
             )
             NumericInput(
                 label = "Meta calórica diária (kcal)",
                 value = dailyCalories,
-                onValueChange = { dailyCalories = it },
+                onValueChange = viewModel::onCaloriesChange,
                 placeholder = "Ex.: 2000",
                 unit = "kcal/dia"
             )
@@ -132,7 +150,7 @@ fun DailyGoalsScreen(
             MacronutrientCard(
                 name = "Carboidratos",
                 percentage = carbohydrates,
-                onPercentageChange = { carbohydrates = it },
+                onPercentageChange = viewModel::onCarbohydratesChange,
                 grams = macros?.carb?.toString() ?: "--",
                 nutrientColor = Carbohydrates
             )
@@ -140,7 +158,7 @@ fun DailyGoalsScreen(
             MacronutrientCard(
                 name = "Proteínas",
                 percentage = proteins,
-                onPercentageChange = { proteins = it },
+                onPercentageChange = viewModel::onProteinsChange,
                 grams = macros?.protein?.toString() ?: "--",
                 nutrientColor = Proteins
             )
@@ -148,7 +166,7 @@ fun DailyGoalsScreen(
             MacronutrientCard(
                 name = "Lipídios",
                 percentage = lipids,
-                onPercentageChange = { lipids = it },
+                onPercentageChange = viewModel::onLipidsChange,
                 grams = macros?.fat?.toString() ?: "--",
                 nutrientColor = Lipids
             )
@@ -174,13 +192,16 @@ fun DailyGoalsScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             MainButton(
-                text = if (uiState.isLoading) "Salvando..." else "Continuar",
+                text = if (uiState.isLoading) {
+                    "Salvando..."
+                } else {
+                    "Continuar"
+                },
                 onClick = {
-                    viewModel.createMealPlan(request)
+                    viewModel.saveMealPlan(request)
                 },
                 enabled = isFormValid && !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
-            )
-        }
+            )        }
     }
 }

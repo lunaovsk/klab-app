@@ -27,11 +27,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.klab.app.domain.dto.request.MealDistribRequest
 import com.klab.app.domain.model.enumModel.MealType
 import com.klab.app.service.usecase.MealService
+import com.klab.app.ui.components.BackButton
 import com.klab.app.ui.components.MainButton
+import com.klab.app.ui.components.NumberSelect
 import com.klab.app.ui.components.NumericInput
 import com.klab.app.ui.components.SectionTitle
 import com.klab.app.ui.components.SubText
 import com.klab.app.ui.components.cards.MealCard
+import com.klab.app.ui.navigation.RegisterBackNavigation
 import com.klab.app.ui.theme.BackgroundColor
 import com.klab.app.ui.theme.Errors
 import com.klab.app.ui.viewModel.MealDistributionViewModel
@@ -49,7 +52,10 @@ private data class Meal(
 )
 @Composable
 @Preview
-fun MealDistributionScreen(planId: Long, onContinue: () -> Unit = {}) {
+fun MealDistributionScreen(
+    planId: Long, onContinue: () -> Unit = {},
+    onBack: () -> Unit = {}
+) {
     val mealService: MealService = koinInject()
 
     val viewModel: MealDistributionViewModel = viewModel(
@@ -65,6 +71,15 @@ fun MealDistributionScreen(planId: Long, onContinue: () -> Unit = {}) {
     )
 
     val uiState by viewModel.uiState.collectAsState()
+    val handleBack: () -> Unit = {
+        if (!uiState.isLoading) {
+            onBack()
+        }
+    }
+
+    RegisterBackNavigation(
+        onBack = handleBack
+    )
 
     var mealCount by remember { mutableStateOf("") }
 
@@ -102,6 +117,10 @@ fun MealDistributionScreen(planId: Long, onContinue: () -> Unit = {}) {
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            BackButton(
+                onClick = handleBack,
+                enabled = !uiState.isLoading
+            )
 
             SectionTitle(
                 text = "Distribuição das refeições",
@@ -110,35 +129,27 @@ fun MealDistributionScreen(planId: Long, onContinue: () -> Unit = {}) {
 
             SubText(text = "Defina a quantidade de refeições diárias e como sua meta será distribuída entre elas.")
 
-            NumericInput(
+            NumberSelect(
                 label = "Quantidade de refeições",
                 value = mealCount,
+                options = (1..6).map { it.toString() },
+                placeholder = "Selecione a quantidade",
+                enabled = !uiState.isLoading,
                 onValueChange = { newValue ->
+
                     mealCount = newValue
 
-                    val count = newValue.toIntOrNull()
+                    val count = newValue.toInt()
 
-                    if (count != null && count in 1..6) {
-
-                        while (meals.size < count) {
-                            meals.add(Meal())
-                        }
-
-                        while (meals.size > count) {
-                            meals.removeAt(meals.lastIndex)
-                        }
+                    while (meals.size < count) {
+                        meals.add(Meal())
                     }
-                },
-                placeholder = "Ex.: 3",
-                unit = "refeições"
-            )
 
-            if (mealCount.isNotEmpty() && !isMealCountValid) {
-                SubText(
-                    text = "Informe uma quantidade entre 1 e 6.",
-                    color = Errors
-                )
-            }
+                    while (meals.size > count) {
+                        meals.removeAt(meals.lastIndex)
+                    }
+                }
+            )
 
             if (meals.isNotEmpty()) {
 

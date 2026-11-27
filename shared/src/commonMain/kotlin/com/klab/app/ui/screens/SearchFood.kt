@@ -14,6 +14,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.klab.app.domain.model.food.Food
 import com.klab.app.service.usecase.FoodService
+import com.klab.app.ui.components.BackButton
 import com.klab.app.ui.components.FoodGroupSelector
 import com.klab.app.ui.components.FoodQuantityDialog
 import com.klab.app.ui.components.FoodSearchField
@@ -64,15 +65,9 @@ fun FoodSearchScreen(
         Column(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            TextButton(
+            BackButton(
                 onClick = onBack,
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text(
-                    text = "← Voltar",
-                    color = GreenDetails
-                )
-            }
+            )
 
             Text(
                 text = "Pesquisar alimentos",
@@ -114,12 +109,14 @@ fun FoodSearchScreen(
                 onClick = {
                     viewModel.onGroupChange(null)
                 },
-                label = {
-                    Text(group)
-                },
-                trailingIcon = {
-                    Text("×")
-                }
+                label = { Text(group) },
+                trailingIcon = { Text("×") },
+                colors = InputChipDefaults.inputChipColors(
+                    selectedContainerColor = Outlines,
+                    selectedLabelColor = Button,
+                    selectedTrailingIconColor = Button
+                )
+
             )
         }
 
@@ -242,17 +239,11 @@ fun FoodSearchScreen(
                 enabled = selectedFoods.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GreenDetails
+                    containerColor = Button,
+                    contentColor = WhiteColor
                 )
             ) {
-                Text(
-                    text = "Adicionar ${selectedFoods.size} " +
-                            if (selectedFoods.size == 1) {
-                                "alimento"
-                            } else {
-                                "alimentos"
-                            }
-                )
+                Text(text = "Adicionar ${selectedFoods.size} alimento (s)")
             }
         }
     }
