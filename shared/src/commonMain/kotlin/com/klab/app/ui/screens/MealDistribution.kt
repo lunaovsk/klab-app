@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.klab.app.domain.dto.request.MealDistribRequest
 import com.klab.app.domain.model.enumModel.MealType
 import com.klab.app.service.usecase.MealService
+import com.klab.app.ui.components.BackButton
 import com.klab.app.ui.components.MainButton
 import com.klab.app.ui.components.NumericInput
 import com.klab.app.ui.components.SectionTitle
@@ -49,7 +50,10 @@ private data class Meal(
 )
 @Composable
 @Preview
-fun MealDistributionScreen(planId: Long, onContinue: () -> Unit = {}) {
+fun MealDistributionScreen(
+    planId: Long, onContinue: () -> Unit = {},
+    onBack: () -> Unit = {}
+) {
     val mealService: MealService = koinInject()
 
     val viewModel: MealDistributionViewModel = viewModel(
@@ -102,6 +106,10 @@ fun MealDistributionScreen(planId: Long, onContinue: () -> Unit = {}) {
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            BackButton(
+                onClick = onBack,
+                enabled = !uiState.isLoading
+            )
 
             SectionTitle(
                 text = "Distribuição das refeições",

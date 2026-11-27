@@ -14,6 +14,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.klab.app.domain.model.food.Food
 import com.klab.app.service.usecase.FoodService
+import com.klab.app.ui.components.BackButton
 import com.klab.app.ui.components.FoodGroupSelector
 import com.klab.app.ui.components.FoodQuantityDialog
 import com.klab.app.ui.components.FoodSearchField
@@ -64,15 +65,9 @@ fun FoodSearchScreen(
         Column(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            TextButton(
+            BackButton(
                 onClick = onBack,
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text(
-                    text = "← Voltar",
-                    color = GreenDetails
-                )
-            }
+            )
 
             Text(
                 text = "Pesquisar alimentos",

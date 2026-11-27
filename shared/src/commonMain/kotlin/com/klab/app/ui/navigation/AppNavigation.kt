@@ -41,17 +41,43 @@ fun AppNavigation() {
             startDestination = AppRoutes.HOME
         ) {
             composable(AppRoutes.HOME) {
+
                 HomeScreen(
                     onStartPlanning = {
                         navController.navigate(AppRoutes.DAILY_GOALS)
+                    },
+
+                    onViewPlans = {
+                        navController.navigate(AppRoutes.MEAL_PLANS)
+                    },
+
+                    onSearchFoods = {
+                        navController.navigate(AppRoutes.SEARCH_FOOD)
                     }
                 )
             }
+            composable(AppRoutes.MEAL_PLANS) {
 
+                MealPlansScreen(
+
+                    onBack = {
+                        navController.popBackStack()
+                    },
+
+                    onPlanClick = { planId ->
+                        navController.navigate(
+                            AppRoutes.planningOverview(planId)
+                        )
+                    }
+                )
+            }
             composable(AppRoutes.DAILY_GOALS) {
                 DailyGoalsScreen(
                     onContinue = { planId ->
                         navController.navigate(AppRoutes.mealDistribution(planId))
+                    },
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }
@@ -68,7 +94,8 @@ fun AppNavigation() {
 
                 MealDistributionScreen(
                     planId = planId,
-                    onContinue = { navController.navigate(AppRoutes.planningOverview(planId))}
+                    onContinue = { navController.navigate(AppRoutes.planningOverview(planId))},
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable(AppRoutes.PLANNING_OVERVIEW,arguments = listOf(
@@ -101,9 +128,7 @@ fun AppNavigation() {
 
                 MealEditorScreen(
                     mealId = mealId,
-                    onBack = {
-                        navController.popBackStack()
-                    },
+                    onBack = { navController.popBackStack() },
                     onSearchFoods = { draftId ->
                         navController.navigate(
                             AppRoutes.searchFoodOption(mealId, draftId)
@@ -165,9 +190,7 @@ fun AppNavigation() {
             composable(AppRoutes.SEARCH_FOOD) {
                 FoodSearchScreen(
                     mode = SearchModeFood.SEARCH_ONLY,
-                    onBack = {
-                        navController.popBackStack()
-                    }
+                    onBack = { navController.popBackStack() }
                 )
             }
 

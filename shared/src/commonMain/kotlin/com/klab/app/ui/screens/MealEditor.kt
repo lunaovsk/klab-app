@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.klab.app.service.usecase.MealItemService
 import com.klab.app.service.usecase.MealOptionService
 import com.klab.app.service.usecase.MealService
+import com.klab.app.ui.components.BackButton
 import com.klab.app.ui.components.FoodQuantityDialog
 import com.klab.app.ui.components.MainButton
 import com.klab.app.ui.components.SectionTitle
@@ -59,18 +60,10 @@ fun MealEditorScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
 
-            TextButton(
-                onClick = {
-                    if (uiState.drafts.isNotEmpty()) {
-                        showExitDialog = true
-                    } else {
-                        onBack()
-                    }
-                },
-                enabled = !uiState.isSaving
-            ) {
-                Text("← Voltar", color = MainTexts)
-            }
+            BackButton(
+                onClick = onBack,
+                enabled = !uiState.isLoading
+            )
 
             if (uiState.isLoading && data == null) {
                 CircularProgressIndicator(color = GreenDetails)

@@ -23,6 +23,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.klab.app.service.usecase.MealPlanService
+import com.klab.app.ui.components.BackButton
 import com.klab.app.ui.components.MainButton
 import com.klab.app.ui.components.SubText
 
@@ -31,6 +32,7 @@ fun PlanningOverviewScreen(
     planId: Long,
     onMealClick: (Long) -> Unit = {},
     onConcludePlan: () -> Unit = {},
+    onBack: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
 
@@ -72,6 +74,10 @@ fun PlanningOverviewScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                BackButton(
+                    onClick = onBack,
+                    enabled = !uiState.isLoading
+                )
                 Text(
                     text = "$planName",
                     color = MainTexts,

@@ -4,6 +4,7 @@ object AppRoutes {
     const val HOME = "home"
     const val DAILY_GOALS= "daily_goals"
     const val MEAL_DISTRI="meal_distribution/{planId}"
+    const val MEAL_PLANS = "meal_plans"
     const val PLANNING_OVERVIEW = "planning/{planId}"
     const val MEAL_EDITOR = "meal_editor/{mealId}"
     const val SEARCH_FOOD = "search_food"

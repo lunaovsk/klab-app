@@ -35,7 +35,8 @@ import org.koin.compose.koinInject
 @Composable
 @Preview
 fun DailyGoalsScreen(
-    onContinue: (Long) -> Unit = {}
+    onContinue: (Long) -> Unit = {},
+    onBack: () -> Unit = {}
 ) {
     val mealPlanService: MealPlanService = koinInject()
     val viewModel: MealPlanViewModel = viewModel(
@@ -101,6 +102,10 @@ fun DailyGoalsScreen(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            BackButton(
+                onClick = onBack,
+                enabled = !uiState.isLoading
+            )
             SectionTitle(
                 text = "Metas diárias",
                 fontSize = 24.sp
