@@ -23,7 +23,7 @@ fun MealGoalCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = GreenDetails.copy(alpha = 0.15f)
+            containerColor = Outlines
         )
     ) {
         Column(

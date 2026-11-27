@@ -47,7 +47,7 @@ fun MealCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = GreenDetails.copy(alpha = 0.15f)
+            containerColor = Outlines
         )
     ) {
         Column(
@@ -135,12 +135,16 @@ private fun MealTitleSelector(
                 Text("Selecione uma refeição")
             },
             trailingIcon = {
-                Text("⌄")
+                Text("⌄",color=Button)
             },
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MainTexts,
-                unfocusedBorderColor = MainTexts.copy(alpha = 0.35f)
+                focusedBorderColor = Button,
+                unfocusedBorderColor = BorderFields,
+                focusedTextColor = MainTexts,
+                unfocusedTextColor = MainTexts,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White
             )
         )
 

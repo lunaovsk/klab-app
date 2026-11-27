@@ -36,10 +36,17 @@ fun NumericInput(
             keyboardType = KeyboardType.Number
         ),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MainTexts,
-            unfocusedBorderColor = MainTexts.copy(alpha = 0.35f),
+            focusedBorderColor = Button,
+            unfocusedBorderColor = BorderFields,
             focusedTextColor = MainTexts,
-            unfocusedTextColor = MainTexts
+            unfocusedTextColor = MainTexts,
+            focusedLabelColor = Button,
+            unfocusedLabelColor = SecondaryTexts,
+            focusedContainerColor = WhiteColor,
+            unfocusedContainerColor = WhiteColor,
+            cursorColor = Button,
+            errorBorderColor = Errors,
+            errorLabelColor = Errors
         ),
         placeholder= { Text(placeholder) }
     )
@@ -73,11 +80,19 @@ fun PercentageInput(
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Number
         ),
-        colors = androidx.compose.material3
-            .OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MainTexts,
-                unfocusedBorderColor = MainTexts.copy(alpha = 0.35f)
-            )
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Button,
+            unfocusedBorderColor = BorderFields,
+            focusedTextColor = MainTexts,
+            unfocusedTextColor = MainTexts,
+            focusedLabelColor = Button,
+            unfocusedLabelColor = SecondaryTexts,
+            focusedContainerColor = WhiteColor,
+            unfocusedContainerColor = WhiteColor,
+            cursorColor = Button,
+            errorBorderColor = Errors,
+            errorLabelColor = Errors
+        )
     )
 }
 
@@ -104,10 +119,17 @@ fun TextInput(
             keyboardType = KeyboardType.Text
         ),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MainTexts,
-            unfocusedBorderColor = MainTexts.copy(alpha = 0.35f),
+            focusedBorderColor = Button,
+            unfocusedBorderColor = BorderFields,
             focusedTextColor = MainTexts,
-            unfocusedTextColor = MainTexts
+            unfocusedTextColor = MainTexts,
+            focusedLabelColor = Button,
+            unfocusedLabelColor = SecondaryTexts,
+            focusedContainerColor = WhiteColor,
+            unfocusedContainerColor = WhiteColor,
+            cursorColor = Button,
+            errorBorderColor = Errors,
+            errorLabelColor = Errors
         )
     )
 }

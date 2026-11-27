@@ -24,76 +24,42 @@ fun FoodResultItem(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                MaterialTheme.colorScheme.surface,
-                RoundedCornerShape(16.dp)
-            )
+            .background(WhiteColor, RoundedCornerShape(16.dp))
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
+        Column {
             Text(
                 text = food.description,
                 color = MainTexts,
                 style = MaterialTheme.typography.titleMedium
             )
-
             Text(
                 text = food.group,
                 color = SecondaryTexts,
                 style = MaterialTheme.typography.bodySmall
             )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            NutrientValue(
-                label = "Calorias",
-                value = "${food.amountPer100g.calorie} kcal"
-            )
-
-            NutrientValue(
-                label = "Carboidratos",
-                value = "${food.amountPer100g.carb} g"
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            NutrientValue(
-                label = "Proteínas",
-                value = "${food.amountPer100g.protein} g"
-            )
-
-            NutrientValue(
-                label = "Lipídios",
-                value = "${food.amountPer100g.fat} g"
-            )
-        }
-
-
-        if (showSelectionAction) {
-            TextButton(
-                onClick = onSelect,
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text(
-                    text = if (isSelected) {
-                        "Selecionado"
-                    } else {
-                        "+ Adicionar"
-                    },
-                    color = GreenDetails
-                )
+            if (showSelectionAction) {
+                TextButton(
+                    onClick = onSelect
+                ) {
+                    Text(
+                        text = if (isSelected) {
+                            "Selecionado"
+                        } else {
+                            "+ Adicionar"
+                        },
+                        color = Button
+                    )
+                }
             }
         }
+
+
+
+
+
 
     }
 }

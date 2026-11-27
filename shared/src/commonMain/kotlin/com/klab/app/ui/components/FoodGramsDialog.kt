@@ -61,10 +61,23 @@ fun FoodQuantityDialog(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Quantidade em gramas") },
                     suffix = { Text("g") },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Button,
+                        unfocusedBorderColor = BorderFields,
+                        focusedTextColor = MainTexts,
+                        unfocusedTextColor = MainTexts,
+                        focusedLabelColor = Button,
+                        unfocusedLabelColor = SecondaryTexts,
+                        focusedContainerColor = WhiteColor,
+                        unfocusedContainerColor = WhiteColor,
+                        cursorColor = Button,
+                        errorBorderColor = Errors,
+                        errorLabelColor = Errors
+                    ),
                     singleLine = true
                 )
 
-                HorizontalDivider()
+                HorizontalDivider(color = BorderLines)
 
                 Text(
                     text = "Valores nutricionais",
@@ -103,12 +116,12 @@ fun FoodQuantityDialog(
                 onClick = { quantity?.let(onConfirm) },
                 enabled = quantity != null
             ) {
-                Text(if (isEditing) "Salvar" else "Adicionar")
+                Text(if (isEditing) "Salvar" else "Adicionar", color = Button)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text("Cancelar", color=Errors)
             }
         },
         containerColor = BackgroundColor

@@ -26,9 +26,7 @@ fun MealPlanCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
+        colors = CardDefaults.cardColors(WhiteColor),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
         )
@@ -60,7 +58,7 @@ fun MealPlanCard(
                 }
             }
 
-            HorizontalDivider()
+            HorizontalDivider(color = BorderLines)
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -69,13 +67,13 @@ fun MealPlanCard(
             ) {
                 Text(
                     text = "Abrir planejamento",
-                    color = GreenDetails,
+                    color = Button,
                     style = MaterialTheme.typography.labelMedium
                 )
 
                 Text(
                     text = "→",
-                    color = GreenDetails
+                    color = Button
                 )
             }
         }

@@ -24,16 +24,17 @@ fun FoodGroupSelector(
         ) {
             Text(
                 text = "Filtrar por",
-                color = GreenDetails
+                color = Button
             )
         }
 
         DropdownMenu(
             expanded = expanded,
+            containerColor = WhiteColor,
             onDismissRequest = { expanded = false }
         ) {
             DropdownMenuItem(
-                text = { Text("Todos os grupos") },
+                text = { Text(text="Todos os grupos",color = MainTexts) },
                 onClick = {
                     onGroupSelected(null)
                     expanded = false
@@ -42,7 +43,7 @@ fun FoodGroupSelector(
 
             groups.forEach { group ->
                 DropdownMenuItem(
-                    text = { Text(group) },
+                    text = { Text( text=group,color = MainTexts,) },
                     onClick = {
                         onGroupSelected(group)
                         expanded = false

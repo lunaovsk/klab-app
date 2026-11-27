@@ -42,7 +42,7 @@ fun MealOptionCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = GreenDetails.copy(alpha = 0.15f)
+            containerColor = Outlines
         )
     ) {
         Column(
@@ -67,7 +67,7 @@ fun MealOptionCard(
                 }
             }
 
-            HorizontalDivider()
+            HorizontalDivider(color=BorderLines)
 
             if (option.items.isEmpty()) {
                 SubText(
@@ -88,7 +88,7 @@ fun MealOptionCard(
                         )
                     }
 
-                    HorizontalDivider()
+                    HorizontalDivider(color = BorderLines)
                 }
             }
 
@@ -110,6 +110,7 @@ fun MealOptionCard(
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier.fillMaxWidth(),
+                    trackColor = BorderLines,
                     color = GreenDetails
                 )
 
@@ -120,7 +121,7 @@ fun MealOptionCard(
                         "Meta calórica ainda não atingida"
                     },
                     color = if (option.isWithinGoal) {
-                        GreenDetails
+                        Button
                     } else {
                         SecondaryTexts
                     }
@@ -195,24 +196,6 @@ private fun MealOptionFoodItem(
                     "${macros.calorie.formatOption()} kcal"
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            TextButton(
-                onClick = onEdit,
-                enabled = enabled
-            ) {
-                Text("Editar", color = GreenDetails)
-            }
-
-            TextButton(
-                onClick = onRemove,
-                enabled = enabled
-            ) {
-                Text("Remover", color = Errors)
-            }
-        }
     }
 }
 

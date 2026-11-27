@@ -5,7 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.klab.app.ui.screens.enums.PlanPeriodFilter
-import com.klab.app.ui.theme.GreenDetails
+import com.klab.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,8 +38,16 @@ fun PlanPeriodSelector(
                 )
             },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = GreenDetails,
-                focusedLabelColor = GreenDetails
+                focusedBorderColor = Button,
+                unfocusedBorderColor = BorderFields,
+                focusedLabelColor = Button,
+                unfocusedLabelColor = SecondaryTexts,
+                focusedTextColor = MainTexts,
+                unfocusedTextColor = MainTexts,
+                focusedContainerColor = WhiteColor,
+                unfocusedContainerColor = WhiteColor,
+                focusedTrailingIconColor = Button,
+                unfocusedTrailingIconColor = SecondaryTexts
             ),
             modifier = Modifier
                 .menuAnchor(
@@ -50,6 +58,7 @@ fun PlanPeriodSelector(
 
         ExposedDropdownMenu(
             expanded = expanded,
+            containerColor = WhiteColor,
             onDismissRequest = {
                 expanded = false
             }

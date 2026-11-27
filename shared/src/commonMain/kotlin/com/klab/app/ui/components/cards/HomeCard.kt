@@ -22,11 +22,9 @@ fun HomeCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isPrimary) {
-                GreenDetails
-            } else {
-                MaterialTheme.colorScheme.surface
-            }
+            containerColor =
+                if (isPrimary) { MainTexts }
+                else { WhiteColor }
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
@@ -45,32 +43,26 @@ fun HomeCard(
             ) {
                 Text(
                     text = title,
-                    color = if (isPrimary) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MainTexts
-                    },
+                    color =
+                        if (isPrimary) { WhiteColor }
+                        else { MainTexts },
                     style = MaterialTheme.typography.titleMedium
                 )
 
                 Text(
                     text = description,
-                    color = if (isPrimary) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        SecondaryTexts
-                    },
+                    color =
+                        if (isPrimary) { WhiteColor }
+                        else { SecondaryTexts },
                     style = MaterialTheme.typography.bodySmall
                 )
             }
 
             Text(
                 text = "→",
-                color = if (isPrimary) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    GreenDetails
-                },
+                color =
+                    if (isPrimary) { WhiteColor }
+                    else { Button },
                 style = MaterialTheme.typography.headlineSmall
             )
         }
