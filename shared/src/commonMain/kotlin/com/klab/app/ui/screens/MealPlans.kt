@@ -19,6 +19,7 @@ import com.klab.app.ui.components.SubText
 import com.klab.app.ui.components.TextInput
 import com.klab.app.ui.components.cards.MealPlanCard
 import com.klab.app.ui.navigation.RegisterBackNavigation
+import com.klab.app.ui.screens.enums.PlanPeriodFilter
 import com.klab.app.ui.theme.*
 import com.klab.app.ui.viewModel.meal.MealPlanViewModel
 import org.koin.compose.koinInject
@@ -102,8 +103,15 @@ fun MealPlansScreen(
                     fontSize = 18.sp
                 )
 
-                SubText(
-                    text = "${uiState.filteredPlans.size} planos"
+                SubText(text = "${uiState.filteredPlans.size} planos")
+            }
+            if (uiState.selectedFilter != PlanPeriodFilter.ALL) {
+
+                InputChip(
+                    selected = true,
+                    onClick = { viewModel.onFilterChange(PlanPeriodFilter.ALL) },
+                    label = { Text(uiState.selectedFilter.label) },
+                    trailingIcon = { Text("×") }
                 )
             }
 

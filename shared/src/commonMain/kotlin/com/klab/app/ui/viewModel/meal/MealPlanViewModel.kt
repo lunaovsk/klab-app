@@ -7,6 +7,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.klab.app.domain.dto.MacrosDTO
 import com.klab.app.domain.dto.request.MealPlanRequest
+import com.klab.app.domain.dto.request.MealPlanUpdateRequest
+import com.klab.app.domain.dto.response.MealPlanResponse
 import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.ui.screens.enums.PlanPeriodFilter
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,27 +29,58 @@ class MealPlanViewModel( private val mealPlanService: MealPlanService): ViewMode
         return mealPlanService.previewMacros(request)
     }
 
-    fun createMealPlan(request: MealPlanRequest) {
+    fun saveMealPlan(request: MealPlanRequest) {
+
         if (changeUiState.value.isLoading) return
+
+        val currentPlanId = changeUiState.value.currentPlanId
+
+        changeUiState.update {
+            it.copy(
+                isLoading = true,
+                error = null,
+                savedPlan = null
+            )
+        }
+
         viewModelScope.launch {
-            changeUiState.value = MealPlanState(isLoading = true)
-
             try {
-                val plan = mealPlanService.create(request)
 
-                changeUiState.value = MealPlanState(createdPlan = plan)
+                val plan = if (currentPlanId == null) {
+                    mealPlanService.create(request)
+                } else {
+                    updateExistingPlan(currentPlanId, request)
+                }
+
+                changeUiState.update {
+                    it.copy(
+                        currentPlanId = plan.id,
+                        savedPlan = plan
+                    )
+                }
+
+            } catch (exception: CancellationException) {
+                throw exception
 
             } catch (exception: Exception) {
-                changeUiState.value = MealPlanState(
-                    error = exception.message ?: "Erro ao criar planejamento."
-                )
+                changeUiState.update {
+                    it.copy(
+                        error = exception.message
+                            ?: "Erro ao salvar planejamento."
+                    )
+                }
+
+            } finally {
+                changeUiState.update {
+                    it.copy(isLoading = false)
+                }
             }
         }
-    }
-    fun consumeCreatedPlan() {
-        changeUiState.value = changeUiState.value.copy(createdPlan = null)
-    }
-    fun loadPlans() {
+    }    fun consumeSavedPlan() {
+        changeUiState.update {
+            it.copy(savedPlan = null)
+        }
+    }    fun loadPlans() {
 
         if (changeUiState.value.isLoading) return
 
@@ -145,6 +178,55 @@ class MealPlanViewModel( private val mealPlanService: MealPlanService): ViewMode
         }
 
         return state.copy(filteredPlans = filteredPlans)
+    }
+
+    private suspend fun updateExistingPlan(
+        planId: Long,
+        request: MealPlanRequest
+    ): MealPlanResponse {
+
+        val updateRequest = MealPlanUpdateRequest(
+            id = planId,
+            title = request.title,
+            calories = request.calories,
+            carbosPerc = request.carbosPerc,
+            proteinPerc = request.proteinPerc,
+            fatPerc = request.fatPerc
+        )
+
+        return mealPlanService.update(updateRequest)
+    }
+
+    // funcoes para recuperar valores
+
+    fun onTitleChange(value: String) {
+        changeUiState.update {
+            it.copy(planTitle = value)
+        }
+    }
+
+    fun onCaloriesChange(value: String) {
+        changeUiState.update {
+            it.copy(caloriesInput = value)
+        }
+    }
+
+    fun onCarbohydratesChange(value: String) {
+        changeUiState.update {
+            it.copy(carbohydratesInput = value)
+        }
+    }
+
+    fun onProteinsChange(value: String) {
+        changeUiState.update {
+            it.copy(proteinsInput = value)
+        }
+    }
+
+    fun onLipidsChange(value: String) {
+        changeUiState.update {
+            it.copy(lipidsInput = value)
+        }
     }
 
     companion object {

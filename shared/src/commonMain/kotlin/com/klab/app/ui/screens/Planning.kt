@@ -34,6 +34,7 @@ fun PlanningOverviewScreen(
     onMealClick: (Long) -> Unit = {},
     onConcludePlan: () -> Unit = {},
     onBack: () -> Unit = {},
+    canNavigateBack: Boolean = true,
     modifier: Modifier = Modifier
 ) {
 
@@ -44,7 +45,7 @@ fun PlanningOverviewScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     val handleBack: () -> Unit = {
-        if (!uiState.isLoading) {
+        if (canNavigateBack && !uiState.isLoading) {
             onBack()
         }
     }
@@ -87,7 +88,7 @@ fun PlanningOverviewScreen(
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 BackButton(
                     onClick = handleBack,
-                    enabled = !uiState.isLoading
+                    enabled = canNavigateBack && !uiState.isLoading
                 )
                 Text(
                     text = "$planName",

@@ -1,13 +1,12 @@
 package com.klab.app.ui.components
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.klab.app.ui.screens.enums.PlanPeriodFilter
 import com.klab.app.ui.theme.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanPeriodSelector(
     selectedFilter: PlanPeriodFilter,
@@ -18,47 +17,19 @@ fun PlanPeriodSelector(
         mutableStateOf(false)
     }
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = {
-            expanded = it
-        },
-        modifier = modifier
-    ) {
-        OutlinedTextField(
-            value = selectedFilter.label,
-            onValueChange = {},
-            readOnly = true,
-            label = {
-                Text("Filtrar por")
-            },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded
-                )
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Button,
-                unfocusedBorderColor = BorderFields,
-                focusedLabelColor = Button,
-                unfocusedLabelColor = SecondaryTexts,
-                focusedTextColor = MainTexts,
-                unfocusedTextColor = MainTexts,
-                focusedContainerColor = WhiteColor,
-                unfocusedContainerColor = WhiteColor,
-                focusedTrailingIconColor = Button,
-                unfocusedTrailingIconColor = SecondaryTexts
-            ),
-            modifier = Modifier
-                .menuAnchor(
-                    ExposedDropdownMenuAnchorType.PrimaryNotEditable
-                )
-                .fillMaxWidth()
-        )
+    Box(modifier = modifier) {
 
-        ExposedDropdownMenu(
+        TextButton(
+            onClick = { expanded = true }
+        ) {
+            Text(
+                text = "Filtrar por",
+                color = Button
+            )
+        }
+
+        DropdownMenu(
             expanded = expanded,
-            containerColor = WhiteColor,
             onDismissRequest = {
                 expanded = false
             }

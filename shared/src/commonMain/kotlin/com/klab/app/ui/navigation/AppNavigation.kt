@@ -155,6 +155,11 @@ fun AppNavigation() {
                     val planId = backStackEntry.arguments
                         ?.read { getLongOrNull("planId") }
                         ?: return@composable
+                    val previousRoute =
+                        navController.previousBackStackEntry?.destination?.route
+
+                    val canNavigateBack =
+                        previousRoute != AppRoutes.MEAL_DISTRI
 
                     CompositionLocalProvider(LocalBackNavigationEntry provides backStackEntry) {
 
@@ -166,7 +171,8 @@ fun AppNavigation() {
                             onConcludePlan = {
                                 navController.navigate(AppRoutes.pdfPreview(planId))
                             },
-                            onBack = navigateBack
+                            onBack = navigateBack,
+                            canNavigateBack = canNavigateBack
                         )
                     }
                 }

@@ -37,7 +37,8 @@ import org.koin.compose.koinInject
 @Preview
 fun DailyGoalsScreen(
     onContinue: (Long) -> Unit = {},
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    planId: Long? = null
 ) {
     val mealPlanService: MealPlanService = koinInject()
     val viewModel: MealPlanViewModel = viewModel(
@@ -54,16 +55,18 @@ fun DailyGoalsScreen(
     RegisterBackNavigation(
         onBack = handleBack
     )
-    var dailyCalories by remember { mutableStateOf("") }
-    var carbohydrates by remember { mutableStateOf("") }
-    var proteins by remember { mutableStateOf("") }
-    var lipids by remember { mutableStateOf("") }
+    val dailyCalories = uiState.caloriesInput
+    val carbohydrates = uiState.carbohydratesInput
+    val proteins = uiState.proteinsInput
+    val lipids = uiState.lipidsInput
+    val planTitle = uiState.planTitle
+    val currentPlanId = uiState.currentPlanId
 
-    var planTitle by remember { mutableStateOf("") }
+    LaunchedEffect(uiState.savedPlan) {
+        uiState.savedPlan?.let { plan ->
 
-    LaunchedEffect(uiState.createdPlan) {
-        uiState.createdPlan?.let { plan ->
-            viewModel.consumeCreatedPlan()
+            viewModel.consumeSavedPlan()
+
             onContinue(plan.id)
         }
     }
@@ -127,14 +130,14 @@ fun DailyGoalsScreen(
 
             TextInput(
                 value = planTitle,
-                onValueChange = { planTitle = it },
+                onValueChange = viewModel::onTitleChange,
                 label = "Nome da meta",
                 placeholder = "Nome plano alimentar"
             )
             NumericInput(
                 label = "Meta calórica diária (kcal)",
                 value = dailyCalories,
-                onValueChange = { dailyCalories = it },
+                onValueChange = viewModel::onCaloriesChange,
                 placeholder = "Ex.: 2000",
                 unit = "kcal/dia"
             )
@@ -147,7 +150,7 @@ fun DailyGoalsScreen(
             MacronutrientCard(
                 name = "Carboidratos",
                 percentage = carbohydrates,
-                onPercentageChange = { carbohydrates = it },
+                onPercentageChange = viewModel::onCarbohydratesChange,
                 grams = macros?.carb?.toString() ?: "--",
                 nutrientColor = Carbohydrates
             )
@@ -155,7 +158,7 @@ fun DailyGoalsScreen(
             MacronutrientCard(
                 name = "Proteínas",
                 percentage = proteins,
-                onPercentageChange = { proteins = it },
+                onPercentageChange = viewModel::onProteinsChange,
                 grams = macros?.protein?.toString() ?: "--",
                 nutrientColor = Proteins
             )
@@ -163,7 +166,7 @@ fun DailyGoalsScreen(
             MacronutrientCard(
                 name = "Lipídios",
                 percentage = lipids,
-                onPercentageChange = { lipids = it },
+                onPercentageChange = viewModel::onLipidsChange,
                 grams = macros?.fat?.toString() ?: "--",
                 nutrientColor = Lipids
             )
@@ -189,13 +192,16 @@ fun DailyGoalsScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             MainButton(
-                text = if (uiState.isLoading) "Salvando..." else "Continuar",
+                text = if (uiState.isLoading) {
+                    "Salvando..."
+                } else {
+                    "Continuar"
+                },
                 onClick = {
-                    viewModel.createMealPlan(request)
+                    viewModel.saveMealPlan(request)
                 },
                 enabled = isFormValid && !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
-            )
-        }
+            )        }
     }
 }
