@@ -18,6 +18,7 @@ import com.klab.app.ui.components.SectionTitle
 import com.klab.app.ui.components.SubText
 import com.klab.app.ui.components.TextInput
 import com.klab.app.ui.components.cards.MealPlanCard
+import com.klab.app.ui.navigation.RegisterBackNavigation
 import com.klab.app.ui.theme.*
 import com.klab.app.ui.viewModel.meal.MealPlanViewModel
 import org.koin.compose.koinInject
@@ -36,6 +37,16 @@ fun MealPlansScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
+    val handleBack: () -> Unit = {
+        if (!uiState.isLoading) {
+            onBack()
+        }
+    }
+
+    RegisterBackNavigation(
+        onBack = handleBack
+    )
+
     LaunchedEffect(Unit) {
         viewModel.loadPlans()
     }
@@ -51,7 +62,7 @@ fun MealPlansScreen(
         ) {
 
             BackButton(
-                onClick = onBack,
+                onClick = handleBack,
                 enabled = !uiState.isLoading
             )
 

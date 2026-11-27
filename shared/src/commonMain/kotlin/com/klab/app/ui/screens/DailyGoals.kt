@@ -28,6 +28,7 @@ import com.klab.app.domain.dto.request.MealPlanRequest
 import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.ui.components.*
 import com.klab.app.ui.components.cards.MacronutrientCard
+import com.klab.app.ui.navigation.RegisterBackNavigation
 import com.klab.app.ui.theme.*
 import com.klab.app.ui.viewModel.meal.MealPlanViewModel
 import org.koin.compose.koinInject
@@ -44,6 +45,15 @@ fun DailyGoalsScreen(
     )
     val uiState by viewModel.uiState.collectAsState()
 
+    val handleBack: () -> Unit = {
+        if (!uiState.isLoading) {
+            onBack()
+        }
+    }
+
+    RegisterBackNavigation(
+        onBack = handleBack
+    )
     var dailyCalories by remember { mutableStateOf("") }
     var carbohydrates by remember { mutableStateOf("") }
     var proteins by remember { mutableStateOf("") }
@@ -103,7 +113,7 @@ fun DailyGoalsScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             BackButton(
-                onClick = onBack,
+                onClick = handleBack,
                 enabled = !uiState.isLoading
             )
             SectionTitle(

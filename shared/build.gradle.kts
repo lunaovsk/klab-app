@@ -81,7 +81,8 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.navigation.compose)
             implementation(libs.conamobiledev.pdfkmp)
-            implementation(libs.conamobiledev.pdfkmp.viewer)
+            implementation(libs.conamobiledev.pdfkmp.viewer )
+            implementation(libs.navigation.event.compose)
             // Injeção de Dependência
             implementation(libs.koin.core)
             implementation(libs.koin.compose)

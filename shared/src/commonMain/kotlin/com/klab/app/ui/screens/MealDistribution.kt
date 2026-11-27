@@ -33,6 +33,7 @@ import com.klab.app.ui.components.NumericInput
 import com.klab.app.ui.components.SectionTitle
 import com.klab.app.ui.components.SubText
 import com.klab.app.ui.components.cards.MealCard
+import com.klab.app.ui.navigation.RegisterBackNavigation
 import com.klab.app.ui.theme.BackgroundColor
 import com.klab.app.ui.theme.Errors
 import com.klab.app.ui.viewModel.MealDistributionViewModel
@@ -69,6 +70,15 @@ fun MealDistributionScreen(
     )
 
     val uiState by viewModel.uiState.collectAsState()
+    val handleBack: () -> Unit = {
+        if (!uiState.isLoading) {
+            onBack()
+        }
+    }
+
+    RegisterBackNavigation(
+        onBack = handleBack
+    )
 
     var mealCount by remember { mutableStateOf("") }
 
@@ -107,7 +117,7 @@ fun MealDistributionScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             BackButton(
-                onClick = onBack,
+                onClick = handleBack,
                 enabled = !uiState.isLoading
             )
 

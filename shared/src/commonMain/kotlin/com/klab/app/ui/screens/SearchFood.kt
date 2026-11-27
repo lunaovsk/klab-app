@@ -109,12 +109,14 @@ fun FoodSearchScreen(
                 onClick = {
                     viewModel.onGroupChange(null)
                 },
-                label = {
-                    Text(group)
-                },
-                trailingIcon = {
-                    Text("×")
-                }
+                label = { Text(group) },
+                trailingIcon = { Text("×") },
+                colors = InputChipDefaults.inputChipColors(
+                    selectedContainerColor = Outlines,
+                    selectedLabelColor = Button,
+                    selectedTrailingIconColor = Button
+                )
+
             )
         }
 
@@ -237,17 +239,11 @@ fun FoodSearchScreen(
                 enabled = selectedFoods.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GreenDetails
+                    containerColor = Button,
+                    contentColor = WhiteColor
                 )
             ) {
-                Text(
-                    text = "Adicionar ${selectedFoods.size} " +
-                            if (selectedFoods.size == 1) {
-                                "alimento"
-                            } else {
-                                "alimentos"
-                            }
-                )
+                Text(text = "Adicionar ${selectedFoods.size} alimento (s)")
             }
         }
     }

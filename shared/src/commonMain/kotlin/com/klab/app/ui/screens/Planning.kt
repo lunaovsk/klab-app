@@ -26,6 +26,7 @@ import com.klab.app.service.usecase.MealPlanService
 import com.klab.app.ui.components.BackButton
 import com.klab.app.ui.components.MainButton
 import com.klab.app.ui.components.SubText
+import com.klab.app.ui.navigation.RegisterBackNavigation
 
 @Composable
 fun PlanningOverviewScreen(
@@ -41,6 +42,16 @@ fun PlanningOverviewScreen(
 
     val viewModel: PlanningViewModel = viewModel(factory = PlanningViewModel.factory(mealPlanService,mealService))
     val uiState by viewModel.uiState.collectAsState()
+
+    val handleBack: () -> Unit = {
+        if (!uiState.isLoading) {
+            onBack()
+        }
+    }
+
+    RegisterBackNavigation(
+        onBack = handleBack
+    )
 
     val meals = uiState.meals
     val totalOptions = meals.sumOf { meal -> meal.options.size }
@@ -75,7 +86,7 @@ fun PlanningOverviewScreen(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 BackButton(
-                    onClick = onBack,
+                    onClick = handleBack,
                     enabled = !uiState.isLoading
                 )
                 Text(
@@ -95,7 +106,7 @@ fun PlanningOverviewScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        MaterialTheme.colorScheme.surface,
+                        Outlines,
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
                     )
                     .padding(18.dp),

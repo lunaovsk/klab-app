@@ -71,13 +71,13 @@ fun HomeScreen(
                 }
             }
 
-            HorizontalDivider()
+            HorizontalDivider(color = BorderLines)
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = WhiteColor
                 )
             ) {
                 Column(
